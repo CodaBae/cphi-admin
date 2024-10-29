@@ -7,7 +7,16 @@ import ChangePassword from '../pages/auth/ChangePassword'
 import ResetPassword from '../pages/auth/ResetPassword'
 import DashboardLayout from '../layout/DashboardLayout'
 import Dashboard from '../pages/dashboard'
-import Referrals from '../pages/dashboard'
+import Referrals from '../pages/referrals'
+import Orgs from '../pages/orgs'
+import RewardRequest from '../pages/reward'
+import Appointments from '../pages/appointments'
+import Details from '../components/Details'
+import ReferralDetails from '../components/ReferralDetails'
+import AddOrgs from '../pages/orgs/components/AddOrgs'
+import AddIndividual from '../pages/referrals/components/AddIndividual'
+import Settings from '../pages/settings'
+
 
 const Routers = () => {
   return (
@@ -20,7 +29,16 @@ const Routers = () => {
    
         <Route element={<DashboardLayout />}>
             <Route path='/dashboard' element={<Dashboard />} />
-            <Route path='/details' element={<Referrals />} />
+            <Route path='/appointments' element={<Appointments />} />
+            <Route path='/referrals' element={<Referrals />} />
+            <Route path='/referrals/details' element={<ReferralDetails />} />
+            <Route path='/settings' element={<Settings />} />
+            <Route path='/orgs/add' element={<AddOrgs />} />
+            <Route path='/referrals/add' element={<AddIndividual />} />
+            <Route path='/orgs' element={<Orgs />} />
+            <Route path='/reward-request' element={<RewardRequest />} />
+            <Route path='/client/details' element={<Details />} />
+        
         </Route>
     
     </Routes>
