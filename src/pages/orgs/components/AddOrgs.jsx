@@ -5,6 +5,9 @@ import { CgSpinner } from 'react-icons/cg';
 import { useNavigate } from 'react-router-dom';
 import zxcvbn from 'zxcvbn'
 import * as Yup from "yup"
+import { db } from '../../../firebase-config';
+import { doc, setDoc } from 'firebase/firestore';
+import { toast } from 'react-toastify';
 
 const AddOrgs = () => {
     const [loading, setLoading] = useState(false)
@@ -35,8 +38,35 @@ const AddOrgs = () => {
         fullName: Yup.string().required("Full Name is Required"),
         emailOrPhone: Yup.string().email().required("Email or Phone is required"),
         password: Yup.string().required("Password is required"),
-        checked: Yup.boolean().required("Checkbox is required")
+        // checked: Yup.boolean().required("Checkbox is required")
     })
+
+    const generateReferrerCode = () => {
+        return Math.random().toString(36).substring(2, 10).toUpperCase(); // 8-character code
+    };
+
+    
+    const submitForm = async (values, action) => {
+        setLoading(true);
+        try {
+            const referrerCode = generateReferrerCode();
+            await setDoc(doc(db, 'users', values.emailOrPhone), {
+                ...values,
+                type: "Organization",
+                referrerCode,
+                checked: true,
+                createdAt: new Date(),
+            });
+            toast.success('Account created successfully!');
+            action.resetForm()
+        } catch (error) {
+            toast.error('Failed to create account. Try again.');
+            console.error('Error adding document: ', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
 
   return (
@@ -49,9 +79,8 @@ const AddOrgs = () => {
                     fullName: "",
                     emailOrPhone: "",
                     password: "",
-                    checked: false
                 }}
-                    // validationSchema={formValidationSchema}
+                    validationSchema={formValidationSchema}
                     onSubmit={(values, action) => {
                     window.scrollTo(0, 0);
                     console.log(values, "market")
@@ -104,9 +133,7 @@ const AddOrgs = () => {
                                 ) : null}
                             </div>
                             
-                            <div style={{
-                                minHeight: "60px"
-                            }}>
+                            <div className='flex flex-col gap-2'>
                                 <div className='flex flex-col w-full'>
                                     <div className='relative'>
                                         <input
@@ -138,22 +165,23 @@ const AddOrgs = () => {
                                     </div>
                                     ) : null}
                                 </div>
-                            </div>
-                            <div className={`${values?.password ? "mb-2" : "hidden"}`}>
-                                <p className={`text-sm  font-poppins ${passwordStrength === 0 ? 'text-red-500' : passwordStrength === 1 ? 'text-orange-500' : passwordStrength === 2 ? 'text-yellow-500' : passwordStrength === 3 ? 'text-green-400' : 'text-green-600'}`}>
-                                    {passwordStrength === 0 && "Password Strength: Weak"}
-                                    {passwordStrength === 1 && "Password Strength: Fair"}
-                                    {passwordStrength === 2 && "Password Strength: Good"}
-                                    {passwordStrength === 3 && "Password Strength: Strong"}
-                                    {passwordStrength === 4 && "Password Strength: Very Strong"}
-                                </p>
-                                <div className="w-full h-2 bg-[#E5E5EA] rounded-lg">
-                                    <div
-                                        className={`h-full rounded-lg ${passwordStrength === 0 ? 'bg-[#f00]' : passwordStrength === 1 ? 'bg-[#0ff]' : passwordStrength === 2 ? 'bg-[#ff0]' : passwordStrength === 3 ? 'bg-[#34C759CC]' : 'bg-[#34C759CC]'}`}
-                                        style={{ width: `${(passwordStrength + 1) * 20}%` }} 
-                                    />
+
+                                <div className={`${values?.password ? "mb-2" : "hidden"}`}>
+                                    <p className={`text-sm  font-poppins ${passwordStrength === 0 ? 'text-red-500' : passwordStrength === 1 ? 'text-orange-500' : passwordStrength === 2 ? 'text-yellow-500' : passwordStrength === 3 ? 'text-green-400' : 'text-green-600'}`}>
+                                        {passwordStrength === 0 && "Password Strength: Weak"}
+                                        {passwordStrength === 1 && "Password Strength: Fair"}
+                                        {passwordStrength === 2 && "Password Strength: Good"}
+                                        {passwordStrength === 3 && "Password Strength: Strong"}
+                                        {passwordStrength === 4 && "Password Strength: Very Strong"}
+                                    </p>
+                                    <div className="w-full h-2 bg-[#E5E5EA] rounded-lg">
+                                        <div
+                                            className={`h-full rounded-lg ${passwordStrength === 0 ? 'bg-[#f00]' : passwordStrength === 1 ? 'bg-[#0ff]' : passwordStrength === 2 ? 'bg-[#ff0]' : passwordStrength === 3 ? 'bg-[#34C759CC]' : 'bg-[#34C759CC]'}`}
+                                            style={{ width: `${(passwordStrength + 1) * 20}%` }} 
+                                        />
+                                    </div>
+                                
                                 </div>
-                            
                             </div>
                         
 

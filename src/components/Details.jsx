@@ -1,6 +1,12 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 
 const Details = () => {
+
+    const location = useLocation()
+    const userData = location.state
+
+    console.log(userData, "mellow")
   return (
     <div className='w-full'>
         <div className='flex items-center justify-between'>
@@ -18,45 +24,51 @@ const Details = () => {
             <div className='flex items-center gap-5'>
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Name</p>
-                    <p className='text-[#817F9B] text-base font-sans'>Janet Doug</p>
+                    <p className='text-[#817F9B] text-base font-sans'>{userData?.profile?.fullName}</p>
                 </div>
                 <div className='flex flex-col w-[300px] gap-2'>
-                    <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Email</p>
-                    <p className='text-[#817F9B] text-base font-sans'>Janet.doug@mail.com</p>
+                    <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Email/Phone</p>
+                    <p className='text-[#817F9B] text-base font-sans'>{userData?.profile?.emailOrphone}</p>
                 </div>
             </div>
             <div className='flex items-center gap-5'>
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Phone Number</p>
-                    <p className='text-[#817F9B] text-base font-sans'>+2348123456789</p>
+                    <p className='text-[#817F9B] text-base font-sans'>N/A</p>
                 </div>
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Status</p>
                     <div className='w-[78px] bg-[#F4CB0042] h-[23px] flex items-center justify-center rounded-xl'>
-                        <p className='text-[#FF9909] text-[10px] font-sans'>Pending</p>
+                        <p className='text-[#FF9909] text-[10px] font-sans'>{userData?.status}</p>
                     </div>
                 </div>
             </div>
             <div className='flex items-center gap-5'>
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Date/Time</p>
-                    <p className='text-[#817F9B] text-base font-sans'>9 - 08 - 2024 10:00</p>
+                    <p className='text-[#817F9B] text-base font-sans'>{userData?.date} <span>{userData?.time}</span></p>
                 </div>
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Location</p>
-                    <p className='text-[#817F9B] text-base font-sans'>Lagos</p>
+                    <p className='text-[#817F9B] text-base font-sans'>{userData?.location}</p>
                 </div>
             </div>
             <div className='flex flex-col w-[300px] gap-2'>
                 <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Service</p>
-                <p className='text-[#817F9B] text-base font-sans'>Test, Consultation, Treatment</p>
+                <div className='flex items-center gap-2'>
+                    {
+                        userData.about?.services?.map((s, index) => (
+                            <p key={index} className='text-[#817F9B] text-base font-sans'>
+                                {s}
+                            </p>
+                        ))
+                    }
+                </div>
             </div>
             <div className='flex flex-col gap-2'>
                 <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Description</p>
                 <p className='text-[#817F9B] text-base font-sans'>
-                    I’ve been feeling unwell lately and have noticed some unusual symptoms. 
-                    I also recently had unprotected sex and am worried about my health. 
-                    I believe it's important to get tested to ensure my safety and the safety of my partner.
+                    {userData?.about?.story}
                 </p>
             </div>
 
@@ -67,13 +79,13 @@ const Details = () => {
 
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Name</p>
-                    <p className='text-[#817F9B] text-base font-sans'>Janet Doug</p>
+                    <p className='text-[#817F9B] text-base font-sans'>{userData?.docName || "N/A"}</p>
                 </div>
 
                 <div className='flex flex-col gap-2  mb-5'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Description</p>
                     <p className='text-[#817F9B] text-base font-sans'>
-                       The consultation went well, I refereed her to do some test
+                        {userData?.docSummary || "N/A"}
                     </p>
                 </div>
 

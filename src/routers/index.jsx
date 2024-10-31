@@ -30,11 +30,11 @@ const Routers = () => {
         <Route element={<DashboardLayout />}>
             <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/appointments' element={<Appointments />} />
-            <Route path='/referrals' element={<Referrals />} />
+            <Route path='/individuals' element={<Referrals />} />
             <Route path='/referrals/details' element={<ReferralDetails />} />
             <Route path='/settings' element={<Settings />} />
             <Route path='/orgs/add' element={<AddOrgs />} />
-            <Route path='/referrals/add' element={<AddIndividual />} />
+            <Route path='/individuals/add' element={<AddIndividual />} />
             <Route path='/orgs' element={<Orgs />} />
             <Route path='/reward-request' element={<RewardRequest />} />
             <Route path='/client/details' element={<Details />} />

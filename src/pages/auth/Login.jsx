@@ -4,8 +4,11 @@ import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import { CgSpinner } from 'react-icons/cg';
 import * as Yup from "yup"
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from "react-redux"
 
 import Lock from "../../assets/svg/lock.svg"
+import { loginAdmin } from '../../features/adminLoginSlice';
+
 
 const Login = () => {
     const [loading, setLoading] = useState(false)
@@ -16,10 +19,12 @@ const Login = () => {
         password: Yup.string().required("Password is required"),
     })
 
+    const dispatch = useDispatch()
+
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = 'auto'; // reset on unmount
+            document.body.style.overflow = 'auto'; 
         };
     }, []);
 
@@ -29,9 +34,24 @@ const Login = () => {
         setShowPassword(!showPassword);
     };
 
-    const submitForm = () => {
-        navigate("/dashboard")
+    const submitForm = async (values) => {
+        setLoading(true)
+        const emailOrPhone = values?.emailOrPhone
+        const password = values?.password
+    
+        dispatch(loginAdmin({emailOrPhone, password}))
+        .then((res) => {
+            console.log(res, "pablo")
+            setLoading(false)
+            if(res?.type === "login/loginAdmin/fulfilled") {
+                navigate("/dashboard")
+            } 
+        })
+
     }
+
+    
+
 
   return (
     <div className='bg-[#fff] w-full flex flex-col  h-screen'>
@@ -127,7 +147,7 @@ const Login = () => {
                                         type="checkbox"
                                         value={values.check}
                                         onChange={handleChange}
-                                        className="custom-checkbox" // Add this class for the custom styles
+                                        className="custom-checkbox" 
                                     />
                                         <p className='text-[#1C1C1E] font-poppins text-sm'>Stay signed in</p>
                                     </div>

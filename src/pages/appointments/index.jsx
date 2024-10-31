@@ -4,70 +4,117 @@ import Activity from "../../assets/svg/activity.svg"
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
 import { CiFilter } from 'react-icons/ci'
 import { TbDownload } from 'react-icons/tb'
+import * as XLSX from "xlsx"
+
+import { db } from '../../firebase-config'
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
+import ModalPop from '../../components/modalPop'
+import StatusUpdate from './component/StatusUpdate'
+import { CgSpinner } from 'react-icons/cg'
+import { toast } from 'react-toastify'
 
 const Appointments = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [appointmentsPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
     const [search, setSearch] = useState("")
+    const [allAppointments, setAllAppointments] = useState([])
+    const [allPendingAppointments, setAllPendingAppointments] = useState([])
+    const [allNoShowAppointments, setAllNoShowAppointments] = useState([])
+    const [allCompletedAppointments, setAllCompletedAppointments] = useState([])
+    const [locationFilter, setLocationFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [clientData, setClientData] = useState([])
+    const [updateLoading, setUpdateLoading] = useState(false)
+    const [updateLoadingB, setUpdateLoadingB] = useState(false)
 
 
-    const data = [
-        {
-            id: "#302010",
-            date: "12/8/2024",
-            time:"10:20",
-            name: "Heala Tech",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            location: "Lagos",
-            story: "I’ve been feeling unwell lately and have noticed...",
-            service: ["Consultation", "Test", "Treatment" ],
-            status: "Completed"
-        },
-        {
-            id: "#302011",
-            date: "12/8/2024",
-            time:"10:20",
-            name: "Joy Johnson",
-            email: "mercy.p@mail.com",
-            location: "Lagos",
-            phone: "09034543234",
-            service: ["Test"],
-            story: "I’ve been feeling unwell lately and have noticed...",
-            status: "No Show"
-        },
-        {
-            id: "#302012",
-            date: "12/8/2024",
-            time: "10:20",
-            name: "John Bushmill",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            location: "Lagos",
-            service: ["Treatment" ],
-            story: "I’ve been feeling unwell lately and have noticed...",
-            status: "Completed"
-        },
-        {
-            id: "#302013",
-            date: "12/8/2024",
-            time: "10:20",
-            name: "John Doe",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            service: ["Consultation"],
-            location: "Lagos",
-            story: "I’ve been feeling unwell lately and have noticed...",
-            status: "No Show"
-        },
-    ] 
+    const getAllAppointments = async () => {
+        const referralsRef = collection(db, "referrals");
+    
+        try {
+            const querySnapshot = await getDocs(referralsRef);
+    
+            const allReferrals = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("All Referrals:", allReferrals);
+            setAllAppointments(allReferrals);
+        } catch (err) {
+            console.log(err, "Error fetching referrals");
+        }
+    };
 
-    const filteredAppointments = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || "")
+    const getAllAppointmentsByStatus = async () => {
+        const referralsRef = collection(db, "referrals");
+    
+        try {
+            const p = query(referralsRef, where("status", "==", "Pending"));
+            const n = query(referralsRef, where("status", "==", "No Show"));
+            const c = query(referralsRef, where("status", "==", "Completed"));
+            const pendingQuerySnapshot = await getDocs(p);
+            const noShowQuerySnapshot = await getDocs(n);
+            const completedQuerySnapshot = await getDocs(c);
+    
+            const pendingReferrals = pendingQuerySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            const noShowReferrals = noShowQuerySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            const completedReferrals = completedQuerySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("Pending Referrals:", pendingReferrals);
+            console.log("No Show Referrals:", noShowReferrals);
+            console.log("Completed Referrals:", completedReferrals);
+            setAllPendingAppointments(pendingReferrals);
+            setAllNoShowAppointments(noShowReferrals);
+            setAllCompletedAppointments(completedReferrals);
+        } catch (err) {
+            console.log(err, "Error fetching pending referrals");
+        }
+    };
+
+    useEffect(() => {
+        getAllAppointments()
+        getAllAppointmentsByStatus()
+    }, [updateLoading, updateLoadingB])
+
+    console.log(allAppointments, "allAppointments")
+
+
+
+    const filteredAppointments = allAppointments?.filter((item) => {
+        const matchesSearch = 
+            item.profile.fullName.toLowerCase().includes(search.toLowerCase()) || 
+            item.profile.emailOrphone.toLowerCase().includes(search.toLowerCase());
+    
+        const matchesLocation = 
+            locationFilter === "" || 
+            item.location === locationFilter;
+
+        const matchesStatus = 
+            statusFilter === "" || 
+            item.status === statusFilter;
+        
+        return matchesSearch && matchesLocation && matchesStatus;
+    })
+
+ 
 
     useEffect(() => {
         // Update status pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredAppointments.length / appointmentsPerPage));
+        setTotalPages(Math.ceil(filteredAppointments?.length / appointmentsPerPage));
     }, [appointmentsPerPage]);
 
      // Calculate indices for paginated data
@@ -87,6 +134,32 @@ const Appointments = () => {
          }
      };
 
+    const exportExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(allAppointments); 
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'allAppointments');
+        XLSX.writeFile(workbook, `appointments_${Date.now()}.xlsx`);
+    };
+
+
+    const updateStatus = async (item) => {
+        setUpdateLoading(true)
+        try {
+            
+            const appointmentRef = doc(db, 'referrals', item.id);
+
+            await updateDoc(appointmentRef, {
+                status: 'No Show',
+            });
+            setUpdateLoading(false)
+            toast.success('Status updated successfully!');
+        } catch (error) {
+            setUpdateLoading(false)
+            toast.error('Error updating status!');
+            console.error('Error updating status:', error);
+        }
+    };
+
   return (
     <div className='mt-[30px] w-full'>
         <div className='flex items-center gap-[10px]'>
@@ -98,7 +171,7 @@ const Appointments = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>100</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allPendingAppointments?.length || 0}</p>
                 </div>
             </div>
             <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
@@ -109,7 +182,7 @@ const Appointments = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allCompletedAppointments?.length || 0}</p>
                 </div>
             </div>
             <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
@@ -120,7 +193,7 @@ const Appointments = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allNoShowAppointments?.length || 0}</p>
                 </div>
             </div>
         </div>
@@ -136,19 +209,29 @@ const Appointments = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
-                        <CiFilter className='text-base text-[#6B788E]' />
-                        <p className='text-xs font-semibold font-sans text-[#7A8699]'>Location</p>
-                    </div>
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
-                        <CiFilter className='text-base text-[#6B788E]' />
-                        <p className='text-xs font-semibold font-sans text-[#7A8699]'>Type</p>
-                    </div>
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
-                        <CiFilter className='text-base text-[#6B788E]' />
-                        <p className='text-xs font-semibold font-sans text-[#7A8699]'>Status</p>
-                    </div>
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
+                    <select
+                        value={locationFilter}
+                        onChange={(e) => setLocationFilter(e.target.value)}
+                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                    >
+                        <option value="">Location</option>
+                        <option value="Lagos">Lagos</option>
+                        <option value="Port Harcourt">Port Harcourt</option>
+                    </select>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                    >
+                        <option value="">Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="No Show">No Show</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <div 
+                        className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                        onClick={exportExcel}
+                    >
                         <TbDownload className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Export</p>
                     </div>
@@ -166,10 +249,7 @@ const Appointments = () => {
                                 </div>
                             </th>
                             <th className='w-[298px] h-[18px] text-left  text-[#333843] p-4 font-medium '>
-                                <div className='flex gap-1 flex-col'>
-                                    <p className='text-sm text-[#333843] font-medium  font-inter'>Name</p>
-                              
-                                </div>
+                                <p className='text-sm text-[#333843] font-medium  font-inter'>Name</p>
                             </th>
                             <th className='w-[268px] h-[18px] text-left text-sm text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-medium font-inter'>Phone</p>
@@ -186,14 +266,14 @@ const Appointments = () => {
                             <th className='w-[157px] h-[18px] text-left text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-medium font-inter'>Status</p>
                             </th>
-                            {/*  <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#667085] p-4 font-medium '>
+                            <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#667085] p-4 font-medium '>
                                 Action
-                            </th> */}
+                            </th>
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {
-                            currentAppointments.map((item) => (
+                        {currentAppointments?.length > 0 ?
+                            currentAppointments?.map((item) => (
                                 <tr key={item.id} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     
                                     <td className='w-[147px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
@@ -204,19 +284,18 @@ const Appointments = () => {
                                     </td>
                                     <td className='w-[198px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
                                         <div className='flex flex-col gap-1'>
-                                            <p className='font-sans text-[#333843] font-medium text-sm '>{item?.name}</p>
-                                            <p className='font-sans text-[#667085] font-normal text-sm '>{item?.email}</p>
+                                            <p className='font-sans text-[#333843] font-medium text-sm '>{item?.profile?.fullName}</p>
                                         </div>
                                     </td>
                                     <td className='w-[168px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-medium text-sm'>{item?.phone}</p>
+                                        <p className='font-sans text-[#667085] font-medium text-sm'>{item?.profile?.emailOrphone}</p>
                                     </td>
                                     <td className='w-[168px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-medium text-sm'>{item?.story}</p>
+                                        <p className='font-sans text-[#667085] truncate font-medium text-sm'>{item?.about?.story?.slice(0, 20)}</p>
                                     </td>
                                     <td className='w-[168px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
                                         {
-                                            item?.service?.map((s, index) => (
+                                            item.about.services?.map((s, index) => (
                                                 <div key={index} className='flex items-center gap-1'>
                                                     <p className='font-sans text-[#667085] font-medium text-sm'>{s}</p>
                                                 </div>
@@ -224,27 +303,47 @@ const Appointments = () => {
                                         }
                                     </td>
                                     <td className='w-[168px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-medium text-sm'>{item?.location}</p>
+                                        <p className='font-sans text-[#667085] font-medium text-sm'>
+                                            {item?.location}
+                                        </p>
                                     </td>
                                     <td className='w-[167px] h-[56px] text-left font-euclid text-[#667085] p-4 font-medium '>
                                         <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]" : item?.status === "No Show" ? "bg-[#FEE5EC]" : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
-                                            <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : item?.status === "No Show" ? "text-[#F4003D]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
+                                            <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : item?.status === "No Show" ? "text-[#F4003D]" : "text-[#E46A11]"} font-sans capitalize font-semibold text-center text-sm`}>{item?.status}</p>
                                         </div>
                                     </td>
-                                
-                              
-            
+                                    <td className='w-[157px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
+                                        <div className="flex items-center gap-2">
+                                           <div className='bg-[#F4003D1A] p-2 rounded-lg cursor-pointer' onClick={() => updateStatus(item)}>
+                                                <p className='text-[#F4003D] font-sans whitespace-nowrap'>{updateLoading ? <CgSpinner className=" animate-spin text-lg " /> : 'No Show'}</p>
+                                           </div>
+                                           <div className='bg-[#1EC6771A] p-2 cursor-pointer rounded-lg' onClick={() => {setShowModal(true), setClientData(item)}}>
+                                                <p className='text-[#1EC677] font-sans whitespace-nowrap'>{updateLoadingB ? <CgSpinner className=" animate-spin text-lg " /> : 'Completed'}</p>
+                                           </div>
+                                        </div>
+                                    </td>
                                 </tr>
             
-                            ))
+                            )) : (
+                                <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                    <td colSpan="8" className="relative">
+                                        <div className='absolute inset-0 flex items-center justify-center'>
+                                            <div className='flex flex-col gap-2 items-center'>
+                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Appointment</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>
+              
             </div>
     
             <div className='w-full flex items-center justify-between p-5'>
                 <div className='bg-[#FAFAFE] w-[136px] h-[40px] flex items-center justify-center'>
-                    <p className='font-sans text-[#667085] text-base'>Page 1 of 1</p>
+                    <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
 
                 <div>
@@ -280,6 +379,15 @@ const Appointments = () => {
             </div>
 
         </div>
+
+        <ModalPop isOpen={showModal}>
+            <StatusUpdate 
+                handleClose={() => setShowModal(false)}
+                clientData={clientData}
+                updateLoadingB={updateLoadingB}
+                setUpdateLoadingB={setUpdateLoadingB}
+            />
+        </ModalPop>
 
     </div>
   )

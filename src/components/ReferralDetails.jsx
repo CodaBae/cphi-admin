@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { BiSolidCopy } from 'react-icons/bi'
+import { QRCodeCanvas } from 'qrcode.react';
+import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
+import { CiFilter } from 'react-icons/ci'
+import { TbDownload } from 'react-icons/tb'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { IoEyeOutline } from 'react-icons/io5'
 
 import QrCode from "../assets/png/qr_code.png"
 import Logo from "../assets/svg/logo_small.svg"
 import Activity from "../assets/svg/activity.svg"
-import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
-import { CiFilter } from 'react-icons/ci'
-import { TbDownload } from 'react-icons/tb'
-import { useNavigate } from 'react-router-dom'
-import { IoEyeOutline } from 'react-icons/io5'
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase-config';
 
 
 const ReferralDetails = () => {
@@ -16,6 +19,10 @@ const ReferralDetails = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [referralsPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
+    const [referrals, setReferrals] = useState([])
+    
+
+    const qrRef = useRef();
     
 
     const copyToClipboard = (text) => {
@@ -24,6 +31,51 @@ const ReferralDetails = () => {
     };
 
     const navigate = useNavigate()
+
+    const location = useLocation()
+    const userDetails = location.state
+
+    console.log(userDetails, "userDetails")
+
+    const referrerUrl = `https://cphi-main.vercel.app/${userDetails.referrerCode || ''}`; 
+
+    const downloadQRCode = () => {
+        const canvas = qrRef.current.querySelector('canvas');
+        const imageUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = imageUrl;
+        link.download = "QRCode.png";
+        link.click();
+    };
+
+
+    const referrerCode = userDetails?.referrerCode
+    const getReferrals = async () => {
+        try {
+            const q = query(
+                collection(db, 'referrals'),
+                where('referrerCode', '==', referrerCode)
+            );
+            
+            const querySnapshot = await getDocs(q);
+            
+            const userData = querySnapshot.docs.map(doc => doc.data());
+            
+            setReferrals(userData);
+            
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+        }
+    };
+    
+    console.log(referrals, "scheme");
+
+    useEffect(() => {
+        if (referrerCode) {
+            getReferrals();
+        }
+    }, [referrerCode]);
+
 
     
 
@@ -62,20 +114,20 @@ const ReferralDetails = () => {
         },
     ]
 
-    const filteredReferrals = data.filter((item) => (
-        item.name.toLowerCase().includes(search.toLowerCase()) || 
-        item.email.toLowerCase().includes(search.toLowerCase()) || ""
+    const filteredReferrals = referrals?.filter((item) => (
+        item.profile.fullName.toLowerCase().includes(search.toLowerCase()) || 
+        item.profile.emailOrphone.toLowerCase().includes(search.toLowerCase())
     ))
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(data.length / referralsPerPage));
+        setTotalPages(Math.ceil(filteredReferrals?.length / referralsPerPage));
     }, [referralsPerPage]);
 
      // Calculate indices for paginated data
-     const indexOfLastProduct = currentPage * referralsPerPage;
-     const indexOfFirstProduct = indexOfLastProduct - referralsPerPage;
-     const currentReferrals = filteredReferrals?.slice(indexOfFirstProduct, indexOfLastProduct);
+     const indexOfLastReferral = currentPage * referralsPerPage;
+     const indexOfFirstReferral = indexOfLastReferral - referralsPerPage;
+     const currentReferrals = filteredReferrals?.slice(indexOfFirstReferral, indexOfLastReferral);
  
      const handleNextPage = () => {
          if (currentPage < Math.ceil(currentReferrals?.length / referralsPerPage)) {
@@ -95,15 +147,15 @@ const ReferralDetails = () => {
     <div className='w-full mt-[10px]'>
         <div className='flex items-center gap-[10px]'>
             <div className='w-[336px] rounded-lg h-auto border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
-                <div className='flex items-center cursor-pointer justify-between' onClick={() => copyToClipboard(`https://refer.cphinigeria.com/johndeo`)}>
-                    <p className='font-sans text-sm text-[#424242]'>https://refer.cphinigeria.com/johndeo</p>
+                <div className='flex items-center cursor-pointer justify-between' onClick={() => copyToClipboard(referrerUrl)}>
+                    <p className='font-sans text-sm text-[#424242]'>{referrerUrl}</p>
                     <BiSolidCopy className='text-[#2D84FF] w-5 h-5' />
                 </div>
              
                 <div className='flex flex-col mt-3 items-center gap-2'>
-                    <div className='flex items-start gap-2'>
-                        <img src={QrCode} alt='QrCode' className='w-[61px] h-[64px]' />
-                        <TbDownload className='w-4 h-4 text-[#2D84FF] cursor-pointer'/>
+                    <div className='flex items-start gap-2' ref={qrRef}>
+                        <QRCodeCanvas value={referrerUrl} size={61} bgColor={"#ffffff"} fgColor={"#000000"} />
+                        <TbDownload className='w-4 h-4 text-[#2D84FF] cursor-pointer' onClick={downloadQRCode}/>
                     </div>
                     <img src={Logo} alt='Logo' className='w-[190px] h-[39px]' />
                 </div>
@@ -117,7 +169,7 @@ const ReferralDetails = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{referrals?.length}</p>
                 </div>
             </div>
         </div>
@@ -164,10 +216,7 @@ const ReferralDetails = () => {
                                 <p className='text-sm text-[#333843] font-sans'>Name</p>
                             </th>
                             <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Email</p>
-                            </th>
-                            <th className='w-[268px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Phone</p>
+                                <p className='text-sm text-[#333843] font-sans'>Email/Phone</p>
                             </th>
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Status</p>
@@ -178,26 +227,24 @@ const ReferralDetails = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {
-                            currentReferrals.map((item) => (
-                                <tr key={item.id} className='w-full mt-[18px] border border-[#F0F1F3]' >
+                        { currentReferrals?.length > 0 ?
+                            currentReferrals?.map((item, index) => (
+                                <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]' >
                                     
                                     <td className='w-[143px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{item?.id}</p>
+                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{`#${index + 1}`}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
                                         <p className='font-sans text-[#333843] font-medium text-sm'>{item?.date}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.name}</p>
+                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.profile?.fullName}</p>
                                     </td>
                                     <td className='w-[198px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.email}</p>
+                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.profile?.emailOrphone}</p>
                                         
                                     </td>
-                                    <td className='w-[168px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm'>{item?.phone}</p>
-                                    </td>
+                                    
                                     <td className='w-[167px] h-[56px] text-left font-euclid text-[#667085] p-4 font-medium '>
                                         <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]" : item?.status === "No Show" ? "bg-[#FEE5EC]" : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
                                             <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : item?.status === "No Show" ? "text-[#F4003D]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
@@ -205,14 +252,24 @@ const ReferralDetails = () => {
                                     </td>
                                     
                                     <td className='w-[169px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <div className='flex items-center gap-[10px]  cursor-pointer' onClick={() => navigate("/client/details")}>
+                                        <div className='flex items-center gap-[10px]  cursor-pointer' onClick={() => navigate("/client/details", {state: item})}>
                                             <IoEyeOutline className="text-[17px] text-[#667085]" />
                                         </div>
                                     </td>
             
                                 </tr>
             
-                            ))
+                            )) :  (
+                                <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                    <td colSpan="8" className="relative">
+                                        <div className='absolute inset-0 flex items-center justify-center'>
+                                            <div className='flex flex-col gap-2 items-center'>
+                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Referral Available</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>

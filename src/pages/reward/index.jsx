@@ -3,65 +3,125 @@ import { CiFilter } from 'react-icons/ci'
 import { FaPlus } from 'react-icons/fa6'
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
 import { TbDownload } from 'react-icons/tb'
+import { useNavigate } from 'react-router-dom'
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
+import * as XLSX from "xlsx"
 
 import Activity from "../../assets/svg/activity.svg"
-import { useNavigate } from 'react-router-dom'
+
+import { db } from '../../firebase-config'
+import { CgSpinner } from 'react-icons/cg'
+import { toast } from 'react-toastify'
+
 
 const RewardRequest = () => {
     const [search, setSearch] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
-    const [referralsPerPage] = useState(8)
+    const [rewardRequestPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
+    const [allRequests, setAllRequests] = useState([])
+    const [updateLoading, setUpdateLoading] = useState(false)
+    const [referralTotals, setReferralTotals] = useState({})
+    const [statusFilter, setStatusFilter] = useState("")
 
-    const data = [
-        {
-            id: "#302010",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302011",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302012",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302013",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-    ]
+    
+    const navigate = useNavigate()
 
-    const filteredReferrals = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || "")
+    const getAllRequests = async () => {
+        try {
+            const requestsRef = collection(db, "requests")
+            const querySnapshot = await getDocs(requestsRef);
+
+            const data = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            setAllRequests(data)
+        } catch (err) {
+            console.log("Error getting data:",  err)
+        }
+    }
+
+    console.log(allRequests, "allRequests")
+
+    useEffect(() => {
+        getAllRequests()
+    }, [updateLoading])
+
+    const getTotal = async (referrerCode) => {
+        try {
+            const q = query(
+                collection(db, 'referrals'),
+                where('referrerCode', '==', referrerCode)
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.size; // Get the number of docs directly
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return 0;
+        }
+    };
+
+    const fetchTotals = async () => {
+        const totals = {};
+        
+        // Fetch referral totals for each leaderboard user
+        for (const item of allRequests) {
+            const total = await getTotal(item?.userDetails?.referrerCode);
+            totals[item.userDetails.referrerCode] = total;
+        }
+        
+        // Update the referral totals state
+        setReferralTotals(totals);    
+    };
+
+    useEffect(() => {
+        fetchTotals()
+    }, [allRequests]);
+
+    const updateStatus = async (item) => {
+        setUpdateLoading(true)
+        try {
+            
+            const rewardsRef = doc(db, 'requests', item.id);
+
+            await updateDoc(rewardsRef, {
+                status: 'Completed',
+            });
+            setUpdateLoading(false)
+            toast.success('Status updated successfully!');
+        } catch (error) {
+            setUpdateLoading(false)
+            toast.error('Error updating status!');
+            console.error('Error updating status:', error);
+        }
+    };
+
+    const filteredRewardRequest = allRequests?.filter((item) => {
+        const matchesSearch =
+        item.userDetails.fullName.toLowerCase().includes(search.toLowerCase()) || 
+        item.userDetails.emailOrPhone.toLowerCase().includes(search.toLowerCase()) || ""
+      
+        const matchesStatus = 
+            statusFilter === "" || 
+            item.status === statusFilter;
+
+        return matchesSearch && matchesStatus;
+    });
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(data.length / referralsPerPage));
-    }, [referralsPerPage]);
+        setTotalPages(Math.ceil(filteredRewardRequest?.length / rewardRequestPerPage));
+    }, [rewardRequestPerPage]);
 
      // Calculate indices for paginated data
-     const indexOfLastProduct = currentPage * referralsPerPage;
-     const indexOfFirstProduct = indexOfLastProduct - referralsPerPage;
-     const currentReferrals = filteredReferrals?.slice(indexOfFirstProduct, indexOfLastProduct);
+     const indexOfLastRewardRequest = currentPage * rewardRequestPerPage;
+     const indexOfFirstRewardRequest = indexOfLastRewardRequest - rewardRequestPerPage;
+     const currentRewardRequests = filteredRewardRequest?.slice(indexOfFirstRewardRequest, indexOfLastRewardRequest);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReferrals?.length / referralsPerPage)) {
+         if (currentPage < Math.ceil(currentRewardRequests?.length / rewardRequestPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -72,7 +132,13 @@ const RewardRequest = () => {
          }
      };
 
-     const navigate = useNavigate()
+
+     const exportExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(allRequests); 
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'allRequests');
+        XLSX.writeFile(workbook, `requests_${Date.now()}.xlsx`);
+    };
 
   return (
     <div className='w-full mt-[30px]'>
@@ -84,7 +150,7 @@ const RewardRequest = () => {
                 </div>
             </div>
             <div className='flex flex-col mt-3 gap-5'>
-                <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allRequests?.length}</p>
             </div>
         </div>
         <div className='w-full mt-10'>
@@ -98,11 +164,23 @@ const RewardRequest = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
+                     <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                    >
+                        <option value="">Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    {/* <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
                         <CiFilter className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
-                    </div>
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
+                    </div> */}
+                    <div 
+                        className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                        onClick={exportExcel}
+                    >
                         <TbDownload className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Export</p>
                     </div>
@@ -131,54 +209,68 @@ const RewardRequest = () => {
                                 <p className='text-sm text-[#333843] font-sans'>Name</p>
                             </th>
                             <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Email</p>
+                                <p className='text-sm text-[#333843] font-sans'>Email/Phone</p>
                             </th>
                             <th className='w-[268px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Phone</p>
+                                <p className='text-sm text-[#333843] font-sans'>Status</p>
                             </th>
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Total Requests</p>
+                                <p className='text-sm text-[#333843] font-sans whitespace-nowrap'>Total Referrals</p>
                             </th>
-                            {/*  <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
+                             <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
                                 Action
-                            </th> */}
+                            </th>
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {
-                            currentReferrals.map((item) => (
-                                <tr key={item.id} className='w-full mt-[18px] border border-[#F0F1F3]'>
+                        { currentRewardRequests?.length > 0 ?
+                            currentRewardRequests.map((item, index) => (
+                                <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     
                                     <td className='w-[143px] h-[56px] text-left font-sans p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{item?.id}</p>
+                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{`#${index + 1}`}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-medium text-sm'>{item?.date}</p>
+                                        <p className='font-sans text-[#667085] font-medium text-sm'>
+                                            {new Date(item?.userDetails?.createdAt?.seconds * 1000).toLocaleDateString()}
+                                        </p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.name}</p>
+                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.userDetails?.fullName}</p>
                                     </td>
                                     <td className='w-[198px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.email}</p>
-                                        
+                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.userDetails?.emailOrPhone}</p>
                                     </td>
-                                    <td className='w-[168px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm'>{item?.phone}</p>
-                                    </td>
-                                    <td className='w-[168px] h-[56px] text-left cursor-pointer font-sans p-4 font-medium ' onClick={() => navigate("/referrals/details")}>
-                                        <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>{item?.total}</p>
-                                    </td>
-                                    {/* <td className='w-[167px] h-[56px] text-left font-euclid text-[#333843] p-4 font-medium '>
-                                        <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]" : item?.status === "No Show" ? "bg-[#FEE5EC]" : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
-                                            <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : item?.status === "No Show" ? "text-[#F4003D]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
+                                    <td className='w-[167px] h-[56px] text-left font-euclid text-[#333843] p-4 font-medium '>
+                                        <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]"  : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
+                                            <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
                                         </div>
-                                    </td> */}
+                                    </td>
                                 
-                              
-            
+                                    <td className='w-[168px] h-[56px] text-left cursor-pointer font-sans p-4 font-medium ' onClick={() => navigate("/referrals/details", { state: item})}>
+                                        <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
+                                            {referralTotals[item.userDetails.referrerCode] || 0}
+                                        </p>
+                                    </td>
+                                    
+                                    <td className='w-[148px] h-[56px] text-left font-sans  p-4 font-medium '>
+                                        <div className='bg-[#1EC6771A] p-2 flex items-center justify-center cursor-pointer rounded-lg' onClick={() => {item?.status === "Pending" ? updateStatus(item) : {}}}>
+                                            <p className='text-[#1EC677] text-center font-sans whitespace-nowrap'>{updateLoading ? <CgSpinner className=" animate-spin text-lg " /> : 'Completed'}</p>
+                                        </div>
+                                    </td>
                                 </tr>
             
-                            ))
+                            ))  : (
+                                <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                    <td colSpan="8" className="relative">
+                                        <div className='absolute inset-0 flex items-center justify-center'>
+                                            <div className='flex flex-col gap-2 items-center'>
+                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Reward Requests</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>

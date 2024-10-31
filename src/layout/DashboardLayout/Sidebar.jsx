@@ -8,6 +8,8 @@ import { FaRegFileAlt } from 'react-icons/fa'
 import { FaUsers } from 'react-icons/fa6'
 import { MdOutlineCardGiftcard } from 'react-icons/md'
 import { CiSettings } from 'react-icons/ci'
+import { PiUsersThree } from "react-icons/pi";
+import { BiUser } from 'react-icons/bi'
 
 
 const Sidebar = () => {
@@ -30,12 +32,12 @@ const Sidebar = () => {
           <p className={`${location.pathname === "/appointments" ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Appointments</p>
       </div>
       <div className={`${location.pathname === "/orgs" || location.pathname === "/orgs/add"  ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} onClick={() => navigate("/orgs")}>
-          <FaUsers  className={`${location.pathname === "/orgs" || location.pathname === "/orgs/add"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
+          <PiUsersThree className={`${location.pathname === "/orgs" || location.pathname === "/orgs/add"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
           <p className={`${location.pathname === "/orgs" || location.pathname === "/orgs/add"  ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Orgs</p>
       </div>
-      <div className={`${location.pathname === "/referrals" || location.pathname === "/referrals/add" ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} onClick={() => navigate("/referrals")}>
-          <FaUsers  className={`${location.pathname === "/referrals" || location.pathname === "/referrals/add" ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
-          <p className={`${location.pathname === "/referrals" || location.pathname === "/referrals/add" ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Referrals</p>
+      <div className={`${location.pathname === "/individuals" || location.pathname === "/individuals/add" ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} onClick={() => navigate("/individuals")}>
+          <BiUser  className={`${location.pathname === "/individuals" || location.pathname === "/individuals/add" ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
+          <p className={`${location.pathname === "/individuals" || location.pathname === "/individuals/add" ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Individuals</p>
       </div>
       <div className={`${location.pathname === "/reward-request"  ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} onClick={() => navigate("/reward-request")}>
           <MdOutlineCardGiftcard  className={`${location.pathname === "/reward-request"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>

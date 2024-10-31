@@ -3,65 +3,98 @@ import { CiFilter } from 'react-icons/ci'
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
 import { TbDownload } from 'react-icons/tb'
 import { FaPlus } from "react-icons/fa6";
+import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import * as XLSX from "xlsx"
 
 import Activity from "../../assets/svg/activity.svg"
-import { useNavigate } from 'react-router-dom';
+
+import { db } from '../../firebase-config';
 
 const Orgs = () => {
     const [search, setSearch] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
-    const [referralsPerPage] = useState(8)
+    const [orgsPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
+    const [allOrgs, setAllOrgs] = useState([])
+    const [referralTotals, setReferralTotals] = useState({})
 
-    const data = [
-        {
-            id: "#302010",
-            date: "12/8/2024",
-            name: "Heala Tech",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302011",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302012",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302013",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-    ]
 
-    const filteredReferrals = data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || "")
+    const navigate = useNavigate()
+
+    
+    const getAllOrgs = async () => {
+        const orgsRef = collection(db, "users");
+    
+        try {
+            const q = query(orgsRef, where("type", "==", "Organization"));
+            const querySnapshot = await getDocs(q);
+    
+            const orgs = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("All Orgs:", orgs);
+            setAllOrgs(orgs);
+        } catch (err) {
+            console.log(err, "Error fetching Orgs ");
+        }
+    };
+
+    const getTotal = async (referrerCode) => {
+        try {
+            const q = query(
+                collection(db, 'referrals'),
+                where('referrerCode', '==', referrerCode)
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.size; // Get the number of docs directly
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return 0;
+        }
+    };
+
+    const fetchTotals = async () => {
+        const totals = {};
+        
+        // Fetch referral totals for each leaderboard user
+        for (const item of allOrgs) {
+            const total = await getTotal(item.referrerCode);
+            totals[item.referrerCode] = total;
+        }
+        
+        // Update the referral totals state
+        setReferralTotals(totals);    
+    };
+
+    useState(() => {
+        getAllOrgs()
+    }, [])
+    
+    useEffect(() => {
+        fetchTotals()
+    }, [allOrgs]);
+
+
+    const filteredOrgs = allOrgs?.filter((item) => (
+        item.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        item.emailOrPhone.toLowerCase().includes(search.toLowerCase()) || ""
+    ))
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(data.length / referralsPerPage));
-    }, [referralsPerPage]);
+        setTotalPages(Math.ceil(filteredOrgs?.length / orgsPerPage));
+    }, [orgsPerPage]);
 
      // Calculate indices for paginated data
-     const indexOfLastProduct = currentPage * referralsPerPage;
-     const indexOfFirstProduct = indexOfLastProduct - referralsPerPage;
-     const currentReferrals = filteredReferrals?.slice(indexOfFirstProduct, indexOfLastProduct);
+     const indexOfLastOrgs = currentPage * orgsPerPage;
+     const indexOfFirstOrgs = indexOfLastOrgs - orgsPerPage;
+     const currentOrgs = filteredOrgs?.slice(indexOfFirstOrgs, indexOfLastOrgs);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReferrals?.length / referralsPerPage)) {
+         if (currentPage < Math.ceil(currentOrgs?.length / orgsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -72,7 +105,15 @@ const Orgs = () => {
          }
      };
 
-     const navigate = useNavigate()
+     
+
+     const exportExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(allOrgs); 
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'allOrgs');
+        XLSX.writeFile(workbook, `allOrgs_${Date.now()}.xlsx`);
+    };
+
     
   return (
     <div className='w-full mt-[30px]'>
@@ -84,7 +125,7 @@ const Orgs = () => {
                 </div>
             </div>
             <div className='flex flex-col mt-3 gap-5'>
-                <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allOrgs?.length}</p>
             </div>
         </div>
         <div className='w-full mt-10'>
@@ -98,7 +139,10 @@ const Orgs = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'>
+                    <div 
+                        className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'
+                        onClick={exportExcel}
+                    >
                         <TbDownload className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Export</p>
                     </div>
@@ -127,54 +171,58 @@ const Orgs = () => {
                                 <p className='text-sm text-[#333843] font-sans'>Name</p>
                             </th>
                             <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Email</p>
-                            </th>
-                            <th className='w-[268px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Phone</p>
+                                <p className='text-sm text-[#333843] font-sans'>Email/Phone</p>
                             </th>
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Total Referrals</p>
                             </th>
-                            {/*  <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                Action
-                            </th> */}
+                           
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {
-                            currentReferrals.map((item) => (
-                                <tr key={item.id} className='w-full mt-[18px] border border-[#F0F1F3]'>
+                        { currentOrgs?.length > 0 ?
+                            currentOrgs?.map((item, index) => (
+                                <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     
                                     <td className='w-[143px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{item?.id}</p>
+                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{`#${index + 1}`}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-medium text-sm'>{item?.date}</p>
+                                        <div className='flex flex-col gap-1'>
+                                            <p className='font-sans text-[#333843] font-medium text-sm'>
+                                                {new Date(item?.createdAt?.seconds * 1000).toLocaleDateString()}
+                                            </p>
+                                            <p className='font-sans text-[#333843] font-medium text-sm'>
+                                                {new Date(item?.createdAt?.seconds * 1000).toLocaleTimeString()}
+                                            </p>
+                                        </div>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.name}</p>
+                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.fullName}</p>
                                     </td>
                                     <td className='w-[198px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.email}</p>
+                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.emailOrPhone}</p>
                                         
                                     </td>
-                                    <td className='w-[168px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm'>{item?.phone}</p>
-                                    </td>
-                                    <td className='w-[168px] h-[56px] text-left cursor-pointer font-sans p-4 font-medium ' onClick={() => navigate("/referrals/details")}>
-                                        <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>{item?.total}</p>
-                                    </td>
-                                    {/* <td className='w-[167px] h-[56px] text-left font-euclid text-[#333843] p-4 font-medium '>
-                                        <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]" : item?.status === "No Show" ? "bg-[#FEE5EC]" : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
-                                            <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : item?.status === "No Show" ? "text-[#F4003D]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
-                                        </div>
-                                    </td> */}
-                                
-                              
+                                    
+                                    <td className='w-[168px] h-[56px] text-left cursor-pointer font-sans p-4 font-medium ' onClick={() => navigate("/referrals/details", {state: item})}>
+                                        <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
+                                            {referralTotals[item.referrerCode] || 0}
+                                        </p>
+                                    </td>                              
             
                                 </tr>
-            
-                            ))
+                            )) : (
+                                <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                    <td colSpan="8" className="relative">
+                                        <div className='absolute inset-0 flex items-center justify-center'>
+                                            <div className='flex flex-col gap-2 items-center'>
+                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Organization Available</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>

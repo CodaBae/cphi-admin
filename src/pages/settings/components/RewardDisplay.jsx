@@ -5,6 +5,9 @@ import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/i
 import { TbDownload } from 'react-icons/tb'
 import ModalPop from '../../../components/modalPop'
 import AddReward from './AddReward'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../../../firebase-config'
+import * as XLSX from "xlsx"
 
 const RewardDisplay = () => {
     const [search, setSearch] = useState("")
@@ -12,44 +15,68 @@ const RewardDisplay = () => {
     const [rewardPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
     const [openAddReward, setOpenAddReward] = useState(false)
+    const [rewardsData, setRewardsData] = useState([])
+    const [loading, setLoading] = useState(false)
 
-    const data = [
-        {
-            date: "12/8/2024",
-            range: "1 - 10",
-            description: `Bluetooth Wireless Earbuds: Enjoy quality sound on the go with sleek, wireless audio.
-                          Smart Home Assistant Speaker: Control your home’s lighting, get news updates, 
-                          or play music with ease using devices like Google Home or Amazon Echo.`,
+    // const data = [
+    //     {
+    //         date: "12/8/2024",
+    //         range: "1 - 10",
+    //         description: `Bluetooth Wireless Earbuds: Enjoy quality sound on the go with sleek, wireless audio.
+    //                       Smart Home Assistant Speaker: Control your home’s lighting, get news updates, 
+    //                       or play music with ease using devices like Google Home or Amazon Echo.`,
            
-        },
-        {
-            date: "12/8/2024",
-            range: "11 - 50",
-            description: `Bluetooth Wireless Earbuds: Enjoy quality sound on the go with sleek, wireless audio.
-            Smart Home Assistant Speaker: Control your home’s lighting, get news updates, 
-            or play music with ease using devices like Google Home or Amazon Echo.`,
-        },
-        {
-            date: "12/8/2024",
-            range: "51 - 100",
-            description: `Bluetooth Wireless Earbuds: Enjoy quality sound on the go with sleek, wireless audio.
-            Smart Home Assistant Speaker: Control your home’s lighting, get news updates, 
-            or play music with ease using devices like Google Home or Amazon Echo.`,
-        },
+    //     },
+    //     {
+    //         date: "12/8/2024",
+    //         range: "11 - 50",
+    //         description: `Bluetooth Wireless Earbuds: Enjoy quality sound on the go with sleek, wireless audio.
+    //         Smart Home Assistant Speaker: Control your home’s lighting, get news updates, 
+    //         or play music with ease using devices like Google Home or Amazon Echo.`,
+    //     },
+    //     {
+    //         date: "12/8/2024",
+    //         range: "51 - 100",
+    //         description: `Bluetooth Wireless Earbuds: Enjoy quality sound on the go with sleek, wireless audio.
+    //         Smart Home Assistant Speaker: Control your home’s lighting, get news updates, 
+    //         or play music with ease using devices like Google Home or Amazon Echo.`,
+    //     },
         
-    ]
+    // ]
 
-    const filteredReward = data.filter((item) => item.range.toLowerCase().includes(search.toLowerCase()) || "")
+    const getRewards = async () => {
+        try {
+            const rewardsRef = collection(db, "rewards")
+            const querySnapshot = await getDocs(rewardsRef);
+
+            const data = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            setRewardsData(data)
+        } catch (err) {
+            console.log("Failed to fetch doc", err)
+        }
+    }
+
+    useEffect(() => {
+        getRewards()
+    }, [loading])
+
+    console.log(rewardsData, "rewardsData")
+
+    const filteredReward = rewardsData?.filter((item) => item.description.toLowerCase().includes(search.toLowerCase()) || "")
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredReward.length / rewardPerPage));
+        setTotalPages(Math.ceil(filteredReward?.length / rewardPerPage));
     }, [rewardPerPage]);
 
      // Calculate indices for paginated data
-     const indexOfLastProduct = currentPage * rewardPerPage;
-     const indexOfFirstProduct = indexOfLastProduct - rewardPerPage;
-     const currentReward = filteredReward?.slice(indexOfFirstProduct, indexOfLastProduct);
+     const indexOfLastReward = currentPage * rewardPerPage;
+     const indexOfFirstReward = indexOfLastReward - rewardPerPage;
+     const currentReward = filteredReward?.slice(indexOfFirstReward, indexOfLastReward);
  
      const handleNextPage = () => {
          if (currentPage < Math.ceil(currentReward?.length / rewardPerPage)) {
@@ -62,6 +89,13 @@ const RewardDisplay = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     const exportExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(rewardsData); 
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'rewardsData');
+        XLSX.writeFile(workbook, `rewardsData_${Date.now()}.xlsx`);
+    };
 
 
   return (
@@ -76,11 +110,14 @@ const RewardDisplay = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-                <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
+                {/* <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
                     <CiFilter className='text-base text-[#6B788E]' />
                     <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
-                </div>
-                <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
+                </div> */}
+                <div 
+                    className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg cursor-pointer flex items-center p-3'
+                    onClick={exportExcel}
+                >
                     <TbDownload className='text-base text-[#6B788E]' />
                     <p className='text-xs font-semibold font-sans text-[#7A8699]'>Export</p>
                 </div>
@@ -111,16 +148,15 @@ const RewardDisplay = () => {
                     </tr>
                 </thead>
                 <tbody className=''>
-                    {
-                        currentReward.map((item, index) => (
+                    { currentReward?.length > 0 ?
+                        currentReward?.map((item, index) => (
                             <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
-                                
                             
                                 <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
                                     <p className='font-sans text-[#667085] font-medium text-sm'>{item?.date}</p>
                                 </td>
                                 <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                    <p className='font-sans text-[#333843] font-medium text-sm '>{item?.range}</p>
+                                    <p className='font-sans text-[#333843] font-medium text-sm '>{item?.range?.from} - {item?.range?.to}</p>
                                 </td>
                                 <td className='w-[697px] h-[56px] text-left font-sans  p-4 font-medium '>
                                     <p className='font-sans text-[#667085] font-normal text-sm '>{item?.description}</p>
@@ -128,7 +164,17 @@ const RewardDisplay = () => {
         
                             </tr>
         
-                        ))
+                        )) : (
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <div className='flex flex-col gap-2 items-center'>
+                                            <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Reward Available</p>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        )
                     }
                 </tbody>
             </table>
@@ -171,7 +217,11 @@ const RewardDisplay = () => {
 
         </div>
         <ModalPop isOpen={openAddReward}>
-            <AddReward handleClose={() => setOpenAddReward(false)} />
+            <AddReward 
+                handleClose={() => setOpenAddReward(false)}
+                loading={loading}
+                setLoading={setLoading} 
+            />
         </ModalPop>
 
     </div>

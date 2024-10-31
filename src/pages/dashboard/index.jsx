@@ -1,17 +1,126 @@
 import React, { useEffect, useState } from 'react'
-import { FaArrowUp } from 'react-icons/fa'
 import Chart from 'react-apexcharts';
 import { MdOutlineCalendarToday } from 'react-icons/md'
 
 import Activity from "../../assets/svg/activity.svg"
 
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io';
+import { useSelector } from 'react-redux';
+import { db } from '../../firebase-config';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const Dashboard = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [leaderboardPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
- 
+    const [allAppointments, setAllAppointments] = useState([])
+    const [allOrgs, setAllOrgs] = useState([])
+    const [allIndividuals, setAllIndividuals] = useState([])
+    const [leaderBoard, setLeaderBoard] = useState([])
+    const [referralTotals, setReferralTotals] = useState({});
+
+    const adminData = useSelector((state) => state.adminLogin)
+    console.log(adminData, "fast")
+
+    const getAllAppointments = async () => {
+        const referralsRef = collection(db, "referrals");
+    
+        try {
+            const q = query(referralsRef, where("status", "==", "Pending"));
+            const querySnapshot = await getDocs(q);
+    
+            const pendingReferrals = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("Pending Referrals:", pendingReferrals);
+            setAllAppointments(pendingReferrals);
+        } catch (err) {
+            console.log(err, "Error fetching pending referrals");
+        }
+    };
+
+    const getAllOrgs = async () => {
+        const orgsRef = collection(db, "users");
+    
+        try {
+            const q = query(orgsRef, where("type", "==", "Organization"));
+            const querySnapshot = await getDocs(q);
+    
+            const orgs = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("All Orgs:", orgs);
+            setAllOrgs(orgs);
+        } catch (err) {
+            console.log(err, "Error fetching Orgs ");
+        }
+    };
+
+    const getAllIndividuals = async () => {
+        const individualRef = collection(db, "users");
+    
+        try {
+            const q = query(individualRef, where("type", "==", "Individual"));
+            const querySnapshot = await getDocs(q);
+    
+            const individuals = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("All Individuals:", individuals);
+            setAllIndividuals(individuals);
+        } catch (err) {
+            console.log(err, "Error fetching Orgs ");
+        }
+    };
+
+    const getAllUsers = async () => {
+        const usersRef = collection(db, "users");
+    
+        try {
+            const querySnapshot = await getDocs(usersRef);
+    
+            const allUsers = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+    
+            console.log("All Users:", allUsers);
+            setLeaderBoard(allUsers);
+        } catch (err) {
+            console.error("Error fetching users:", err);
+        }
+    };
+
+    const getTotal = async (referrerCode) => {
+        try {
+            const q = query(
+                collection(db, 'referrals'),
+                where('referrerCode', '==', referrerCode)
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.size; // Get the number of docs directly
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return 0;
+        }
+    };
+
+
+
+    useEffect(() => {
+        getAllAppointments()
+        getAllOrgs()
+        getAllIndividuals()
+        getAllUsers()
+    }, [])
+
+   
 
     const [chartOptions, setChartOptions] = useState({
         chart: {
@@ -120,54 +229,14 @@ const Dashboard = () => {
       };
 
 
-      const data = [
-        {
-            id: "#302010",
-            date: "12/8/2024",
-            name: "Heala Tech",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            type: "Individual",
-            total: 5
-        },
-        {
-            id: "#302011",
-            date: "12/8/2024",
-            name: "Joy Johnson",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            type: "Organization",
-            total: 5
-        },
-        {
-            id: "#302012",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            type: "Individual",
-            total: 5
-        },
-        {
-            id: "#302013",
-            date: "12/8/2024",
-            name: "John Doe",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            type: "Organization",
-            total: 5
-        },
-    ] 
 
     useEffect(() => {
-        // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(data.length / leaderboardPerPage));
+        setTotalPages(Math.ceil(leaderBoard?.length / leaderboardPerPage));
     }, [leaderboardPerPage]);
 
-     // Calculate indices for paginated data
-     const indexOfLastProduct = currentPage * leaderboardPerPage;
-     const indexOfFirstProduct = indexOfLastProduct - leaderboardPerPage;
-     const currentLeaderboard = data?.slice(indexOfFirstProduct, indexOfLastProduct);
+     const indexOfLastLeaderboard = currentPage * leaderboardPerPage;
+     const indexOfFirstLeaderboard = indexOfLastLeaderboard - leaderboardPerPage;
+     const currentLeaderboard = leaderBoard?.slice(indexOfFirstLeaderboard, indexOfLastLeaderboard);
  
      const handleNextPage = () => {
          if (currentPage < Math.ceil(currentLeaderboard?.length / leaderboardPerPage)) {
@@ -181,6 +250,32 @@ const Dashboard = () => {
          }
      };
 
+     useEffect(() => {
+        const fetchTotals = async () => {
+            const totals = {};
+            
+            // Fetch referral totals for each leaderboard user
+            for (const item of leaderBoard) {
+                const total = await getTotal(item.referrerCode);
+                totals[item.referrerCode] = total;
+            }
+            
+            // Update the referral totals state
+            setReferralTotals(totals);
+            
+            // Sort leaderboard by referral totals in descending order
+            const sortedLeaderboard = [...leaderBoard].sort((a, b) => 
+                (totals[b.referrerCode] || 0) - (totals[a.referrerCode] || 0)
+            );
+            
+            setLeaderBoard(sortedLeaderboard);
+        };
+    
+        if (leaderBoard?.length) {
+            fetchTotals();
+        }
+    }, [leaderBoard]);
+    
 
   return (
     <div className='mt-[30px] w-full'>
@@ -193,7 +288,7 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>100</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allAppointments?.length || 0}</p>
                 </div>
             </div>
             <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
@@ -204,7 +299,7 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allOrgs?.length || 0}</p>
                 </div>
             </div>
             <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
@@ -215,7 +310,7 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>23</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allIndividuals?.length || 0}</p>
                 </div>
             </div>
         </div>
@@ -294,10 +389,7 @@ const Dashboard = () => {
                                 <p className='text-sm text-[#333843] font-sans'>Name</p>
                             </th>
                             <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Email</p>
-                            </th>
-                            <th className='w-[268px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Phone</p>
+                                <p className='text-sm text-[#333843] font-sans'>Email/Phone</p>
                             </th>
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Total</p>
@@ -306,46 +398,52 @@ const Dashboard = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {
-                            currentLeaderboard.map((item) => (
-                                <tr key={item.id} className='w-full mt-[18px] border cursor-pointer border-[#F0F1F3]'>
+                        { currentLeaderboard?.length > 0 ?
+                            currentLeaderboard.map((item, index) => (
+                                <tr key={index} className='w-full mt-[18px] border cursor-pointer border-[#F0F1F3]'>
                                     
                                     <td className='w-[143px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{item?.id}</p>
+                                        <p className='font-sans text-[#333843] font-semibold text-sm'>{`#${index + 1}`}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm'>{item?.date}</p>
+                                        <div className='flex flex-col gap-1'>
+                                            <p className='font-sans text-[#333843] font-medium text-sm'>
+                                                {new Date(item?.createdAt?.seconds * 1000).toLocaleDateString()}
+                                            </p>
+                                            <p className='font-sans text-[#333843] font-medium text-sm'>
+                                                {new Date(item?.createdAt?.seconds * 1000).toLocaleTimeString()}
+                                            </p>
+                                        </div>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
                                         <p className='font-sans text-[#333843] font-medium text-sm '>{item?.type}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.name}</p>
+                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.fullName}</p>
                                     </td>
                                     <td className='w-[198px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-normal text-xs '>{item?.email}</p>
-                                        
+                                        <p className='font-sans text-[#667085] font-normal text-xs '>{item?.emailOrPhone}</p>      
                                     </td>
+                                    
                                     <td className='w-[168px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm'>{item?.phone}</p>
+                                        <p className='font-sans text-[#2D84FF] font-medium text-sm'>
+                                            {referralTotals[item.referrerCode] || 0}
+                                        </p>
                                     </td>
-                                    <td className='w-[168px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <p className='font-sans text-[#2D84FF] font-medium text-sm'>{item?.total}</p>
-                                    </td>
-                                
-                                    {/* 
-                                    <td className='w-[169px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                        <div className='flex items-center gap-[10px]'>
-                                            <VscEdit className='cursor-pointer text-[#667085] text-[17px]' onClick={() => navigate("/invoices/edit")}/>
-                                            <IoEyeOutline className="text-[17px] text-[#667085] cursor-pointer" onClick={() => navigate("/invoices/view")}/>
-                                            <TbDownload className="text-[17px] text-[#667085] cursor-pointer" />
-                                            <RiDeleteBin6Line className="text-[17px] text-[#667085] cursor-pointer" onClick={() => setOpenDelete(true)} />
-                                        </div>
-                                    </td> */}
             
                                 </tr>
             
-                            ))
+                            )) : (
+                                <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                    <td colSpan="8" className="relative">
+                                        <div className='absolute inset-0 flex items-center justify-center'>
+                                            <div className='flex flex-col gap-2 items-center'>
+                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Leaderboard</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>
@@ -353,14 +451,15 @@ const Dashboard = () => {
     
             <div className='w-full flex items-center justify-between p-5'>
                 <div className='bg-[#FAFAFE] w-[136px] h-[40px] flex items-center justify-center'>
-                    <p className='font-sans text-[#667085] text-base'>Page 1 of 1</p>
+                    <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
 
                 <div>
                     <div className='flex h-[34px] justify-center  w-full gap-2 items-center'>
 
                         <div 
-                            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)} 
+                            // onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)} 
+                            onClick={() => handlePrevPage()} 
                             className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out  flex justify-center items-center cursor-pointer w-8 h-full  ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}
                         >
                             <IoIosArrowBack className='text-[#667085] hover:text-[#fff]'/>
@@ -378,7 +477,8 @@ const Dashboard = () => {
 
 
                         <div 
-                            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)} 
+                            // onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)} 
+                            onClick={() => handleNextPage()}
                             className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full  bg-[#FAFAFE] ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}
                         >
                             <IoIosArrowForward className='text-[#667085] hover:text-[#fff]'/>
