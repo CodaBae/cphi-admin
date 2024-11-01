@@ -8,6 +8,8 @@ import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/i
 import { useSelector } from 'react-redux';
 import { db } from '../../firebase-config';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { CgSpinner } from 'react-icons/cg';
+
 
 const Dashboard = () => {
     const [currentPage, setCurrentPage] = useState(1)
@@ -18,12 +20,15 @@ const Dashboard = () => {
     const [allIndividuals, setAllIndividuals] = useState([])
     const [leaderBoard, setLeaderBoard] = useState([])
     const [referralTotals, setReferralTotals] = useState({});
+    const [selectedYear, setSelectedYear] = useState(2024);
+    const [loading, setLoading] = useState(false)
 
     const adminData = useSelector((state) => state.adminLogin)
     console.log(adminData, "fast")
 
     const getAllAppointments = async () => {
         const referralsRef = collection(db, "referrals");
+        setLoading(true)
     
         try {
             const q = query(referralsRef, where("status", "==", "Pending"));
@@ -38,6 +43,8 @@ const Dashboard = () => {
             setAllAppointments(pendingReferrals);
         } catch (err) {
             console.log(err, "Error fetching pending referrals");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -122,112 +129,157 @@ const Dashboard = () => {
         getAllUsers()
     }, [])
 
+    let monthlyReferrals = Array(12).fill(0);
+
    
+    allAppointments.forEach(appointment => {
+        const [day, month, year] = appointment.date.split('/').map(Number);
+        if (appointment.referrerCode) {
+            monthlyReferrals[month - 1] += 1;
+        }
+    });
 
     const [chartOptions, setChartOptions] = useState({
         chart: {
-          type: 'line',
-          toolbar: {
-            show: false,
-          },
-        },
-        stroke: {
-          curve: 'smooth', 
-          width: 3, 
+            type: 'line',
+            toolbar: { show: false },
         },
         xaxis: {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         },
         yaxis: {
-          labels: {
-            formatter: (val) => `${val}k`, 
-          },
-          min: 0,
-          max: 120, 
+            labels: {
+                formatter: (val) => `${val}`,
+            },
+            min: 0,
         },
-        dataLabels: {
-          enabled: false, 
+        stroke: {
+            curve: 'smooth',
+            width: 3,
         },
+        dataLabels: { enabled: false },
         fill: {
-          type: 'gradient',
-          gradient: {
-            shade: 'light',
-            type: 'vertical',
-            shadeIntensity: 0.5,
-            gradientToColors: ['#A0F9B9'], 
-            inverseColors: false,
-            opacityFrom: 0.6,
-            opacityTo: 0.1,
-            stops: [0, 100],
-          },
+            type: 'gradient',
+            gradient: {
+                shade: 'light',
+                type: 'vertical',
+                shadeIntensity: 0.5,
+                gradientToColors: ['#A0F9B9'],
+                inverseColors: false,
+                opacityFrom: 0.6,
+                opacityTo: 0.1,
+                stops: [0, 100],
+            },
         },
         grid: {
-          strokeDashArray: 4, 
+            strokeDashArray: 4,
         },
-        colors: ['#00E396'], // Line color
+        colors: ['#00E396'],
+    });
+
+    const [seriesData, setSeriesData] = useState([]);
+
+    useEffect(() => {
+        // Step 1: Initialize monthly referrals
+        let monthlyReferrals = Array(12).fill(0);
+
+        // Step 2: Process allAppointments
+        allAppointments.forEach((appointment) => {
+            const [day, month, year] = appointment.date.split('/').map(Number);
+            if (appointment.referrerCode) {
+                monthlyReferrals[month - 1] += 1;
+            }
+        });
+
+        // Step 3: Update series and y-axis max in chart options
+        setSeriesData([{ name: 'Referrals', data: monthlyReferrals }]);
+        setChartOptions((prevOptions) => ({
+            ...prevOptions,
+            yaxis: {
+                ...prevOptions.yaxis,
+                max: Math.max(...monthlyReferrals) + 10,
+            },
+        }));
+    }, [allAppointments]); // Re-run when allAppointments data changes
+
+
+
+    // Sample function to parse date and extract year
+    const getYear = (dateString) => {
+        return new Date(dateString.split('/').reverse().join('-')).getFullYear();
+    };
+
+     // Filter appointments by selected year
+     const filteredAppointments = allAppointments?.filter(booking => getYear(booking.date) === selectedYear);
+
+
+      let serviceCount = {};
+      filteredAppointments?.forEach(booking => {
+          booking.about.services.forEach(service => {
+              if (service) {
+                  serviceCount[service] = (serviceCount[service] || 0) + 1;
+              }
+          });
       });
-    
-    const [chartSeries, setChartSeries] = useState([
-        {
-          name: 'Referral Growth',
-          data: [60, 75, 55, 90, 80, 70, 95, 85, 110, 100, 105, 115], 
-        },
-      ]);
-
-
+      
+      let rankedServices = Object.entries(serviceCount)
+          .sort((a, b) => b[1] - a[1])
+          .map(([service, count]) => ({ service, count }));
+      
+      
       const chartData = {
-        series: [115900, 57000], 
-        options: {
-          chart: {
-            type: 'donut',
-          },
-          labels: ['Pay In', 'Pay out'],
-          colors: ['#10B981', '#F59E0B'], 
-          legend: {
-            show: false,
-            position: 'right',
-            markers: {
-              width: 12,
-              height: 12,
-              radius: 12,
-            },
-          },
-          dataLabels: {
-            enabled: false,
-            formatter: function (val, opts) {
-              return `${val.toFixed(0)}%`;
-            },
-          },
-          plotOptions: {
-            pie: {
-              donut: {
-                labels: {
+          series: rankedServices.map(item => item.count),  
+          options: {
+              chart: {
+                  type: 'donut',
+              },
+              labels: rankedServices.map(item => item.service),  
+              colors: ['#10B981', '#F59E0B', '#34D399', '#F87171', '#A78BFA'],  
+              legend: {
                   show: true,
-                  total: {
-                    show: true,
-                    label: 'Services',
-                    formatter: function () {
-                      return '500';
-                    },
+                  position: 'right',
+                  markers: {
+                      width: 12,
+                      height: 12,
+                      radius: 12,
                   },
-                },
               },
-            },
+              dataLabels: {
+                  enabled: false,
+                  formatter: function (val, opts) {
+                      return `${val.toFixed(0)}%`;
+                  },
+              },
+              plotOptions: {
+                  pie: {
+                      donut: {
+                          labels: {
+                              show: true,
+                              total: {
+                                  show: true,
+                                  label: 'Total Bookings',
+                                  formatter: function () {
+                                      return `${allAppointments?.length}`;
+                                  },
+                              },
+                          },
+                      },
+                  },
+              },
+              responsive: [
+                  {
+                      breakpoint: 480,
+                      options: {
+                          chart: {
+                              width: 200,
+                          },
+                          legend: {
+                              position: 'bottom',
+                          },
+                      },
+                  },
+              ],
           },
-          responsive: [
-            {
-              breakpoint: 480,
-              options: {
-                chart: {
-                  width: 200,
-                },
-                legend: {
-                  position: 'bottom',
-                },
-              },
-            },
-          ],
-        },
       };
 
 
@@ -256,7 +308,7 @@ const Dashboard = () => {
         const fetchTotals = async () => {
             const totals = {};
             
-            // Fetch referral totals for each leaderboard user
+       
             for (const item of leaderBoard) {
                 const total = await getTotal(item.referrerCode);
                 totals[item.referrerCode] = total;
@@ -318,53 +370,42 @@ const Dashboard = () => {
         </div>
 
         <div className='flex flex-col lg:flex-row items-center gap-5 mt-5'>
-            <div className='flex flex-col w-full lg:w-6/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
+             <div className='flex flex-col w-full lg:w-6/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
             <div className='flex items-center justify-between'>
                 <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Referral Growth</p>
-                <div className='flex items-center justify-center gap-4 border border-[#E5E5EA] rounded-lg h-[42px] w-[80px]'>
-                    <p className='font-sans text-[#1C1A3C] font-medium text-xs'>Orgs</p>
-                    <IoIosArrowDown className='w-5 h-5 text-[#1C1A3C]' />
-                </div>
             </div>
             <div className='mt-4'>
-                <Chart options={chartOptions} series={chartSeries} type='line' height={300} />
+                <Chart options={chartOptions} series={seriesData} type='line' height={300} />
             </div>
-            </div>
+        </div>
 
-            <div className='flex flex-col w-full lg:w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
-                <div className='flex items-center justify-between'>
-                    <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Services Rank</p>
-                    <div className='flex items-center justify-center gap-4 border border-[#E5E5EA] rounded-lg h-[32px] w-[80px]'>
-                        <MdOutlineCalendarToday className='w-4 h-4 text-[#1C1A3C]' />
-                        <p className='font-sans text-[#1C1A3C] font-medium text-xs'>2024</p>
-                    </div>
-                </div>
-                <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
-                    <Chart
-                        options={chartData.options}
-                        series={chartData.series}
-                        type='donut'
-                        height={240}
-                    />
-                    <div className='flex flex-row flex-wrap lg:flex-col gap-6'>
-                        <div className='flex items-start gap-4'>
-                            <div className='w-[8px] h-[8px] rounded-full mt-1 bg-[#1EC677]'></div>
-                            <div className='flex flex-col'>
-                                <p className='font-sans text-[#AEAEB2] text-xs'>HIV</p>
-                                <p className='text-base font-sans font-semibold'>300</p>
-                            </div>
-                        </div>
-                        <div className='flex items-start gap-4'>
-                            <div className='w-[8px] h-[8px] rounded-full mt-1 bg-[#FFB752]'></div>
-                            <div className='flex flex-col'>
-                                <p className='font-sans text-[#AEAEB2] text-xs'>HPV</p>
-                                <p className='text-base font-sans font-semibold'>40</p>
-                            </div>
-                        </div>
-
-                    </div>
+        <div className='flex flex-col w-full lg:w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
+            <div className='flex items-center justify-between'>
+                <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Services Rank</p>
+                <div className='flex items-center justify-center gap-4 cursor-pointer border border-[#E5E5EA] rounded-lg p-2 h-auto w-[120px]'>
+                    <MdOutlineCalendarToday className='w-4 h-4 text-[#1C1A3C]' />
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className='font-sans text-[#1C1A3C] font-medium text-xs cursor-pointer bg-transparent border-none outline-none'
+                    >
+                        {[2024, 2023, 2022].map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
+            <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
+                <Chart
+                    options={chartData.options}
+                    series={chartData.series}
+                    type='donut'
+                    width={600}
+                    height={240}
+                />
+            </div>
+        </div>
+                   
         </div>
 
         <div className='flex flex-col mt-[25px] gap-3'>
@@ -400,7 +441,16 @@ const Dashboard = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        { currentLeaderboard?.length > 0 ?
+                        {loading ? 
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                    </div>
+                                </td>
+                            </tr>
+                           :
+                            currentLeaderboard?.length > 0 ?
                             currentLeaderboard.map((item, index) => (
                                 <tr key={index} className='w-full mt-[18px] border cursor-pointer border-[#F0F1F3]'>
                                     

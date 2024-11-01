@@ -36,6 +36,7 @@ const AddAdmin = ({ handleClose }) => {
             });
             toast.success('Admin Added successfully!');
             action.resetForm()
+            handleClose()
         } catch (error) {
             toast.error('Failed to Add Admin. Try again.');
             console.error('Error adding document: ', error);

@@ -28,11 +28,11 @@ const Appointments = () => {
     const [clientData, setClientData] = useState([])
     const [updateLoading, setUpdateLoading] = useState(false)
     const [updateLoadingB, setUpdateLoadingB] = useState(false)
-
+    const [loading, setLoading] = useState(true)
 
     const getAllAppointments = async () => {
         const referralsRef = collection(db, "referrals");
-    
+        setLoading(true)
         try {
             const querySnapshot = await getDocs(referralsRef);
     
@@ -45,6 +45,8 @@ const Appointments = () => {
             setAllAppointments(allReferrals);
         } catch (err) {
             console.log(err, "Error fetching referrals");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -114,7 +116,7 @@ const Appointments = () => {
 
     useEffect(() => {
         // Update status pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredAppointments?.length / appointmentsPerPage));
+        setTotalPages(Math.ceil(allAppointments?.length / appointmentsPerPage));
     }, [appointmentsPerPage]);
 
      // Calculate indices for paginated data
@@ -212,7 +214,7 @@ const Appointments = () => {
                     <select
                         value={locationFilter}
                         onChange={(e) => setLocationFilter(e.target.value)}
-                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] cursor-pointer outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
                     >
                         <option value="">Location</option>
                         <option value="Lagos">Lagos</option>
@@ -221,7 +223,7 @@ const Appointments = () => {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] cursor-pointer outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
                     >
                         <option value="">Status</option>
                         <option value="Pending">Pending</option>
@@ -229,7 +231,7 @@ const Appointments = () => {
                         <option value="Completed">Completed</option>
                     </select>
                     <div 
-                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] cursor-pointer gap-1 rounded-lg flex items-center p-3'
                         onClick={exportExcel}
                     >
                         <TbDownload className='text-base text-[#6B788E]' />
@@ -272,7 +274,16 @@ const Appointments = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {currentAppointments?.length > 0 ?
+                        {loading ? 
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                    </div>
+                                </td>
+                            </tr>
+                            :
+                            currentAppointments?.length > 0 ?
                             currentAppointments?.map((item) => (
                                 <tr key={item.id} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     

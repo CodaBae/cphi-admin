@@ -10,6 +10,7 @@ import * as XLSX from "xlsx"
 import Activity from "../../assets/svg/activity.svg"
 
 import { db } from '../../firebase-config';
+import { CgSpinner } from 'react-icons/cg';
 
 const Orgs = () => {
     const [search, setSearch] = useState("")
@@ -18,6 +19,7 @@ const Orgs = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [allOrgs, setAllOrgs] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
+    const [loading, setLoading] = useState(false)
 
 
     const navigate = useNavigate()
@@ -25,7 +27,7 @@ const Orgs = () => {
     
     const getAllOrgs = async () => {
         const orgsRef = collection(db, "users");
-    
+        setLoading(true)
         try {
             const q = query(orgsRef, where("type", "==", "Organization"));
             const querySnapshot = await getDocs(q);
@@ -39,6 +41,8 @@ const Orgs = () => {
             setAllOrgs(orgs);
         } catch (err) {
             console.log(err, "Error fetching Orgs ");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -85,7 +89,7 @@ const Orgs = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredOrgs?.length / orgsPerPage));
+        setTotalPages(Math.ceil(allOrgs?.length / orgsPerPage));
     }, [orgsPerPage]);
 
      // Calculate indices for paginated data
@@ -180,7 +184,16 @@ const Orgs = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        { currentOrgs?.length > 0 ?
+                        { loading ? 
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                    </div>
+                                </td>
+                            </tr>
+                            :
+                            currentOrgs?.length > 0 ?
                             currentOrgs?.map((item, index) => (
                                 <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     

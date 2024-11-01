@@ -23,11 +23,13 @@ const RewardRequest = () => {
     const [updateLoading, setUpdateLoading] = useState(false)
     const [referralTotals, setReferralTotals] = useState({})
     const [statusFilter, setStatusFilter] = useState("")
+    const [loading, setLoading] = useState(false)
 
     
     const navigate = useNavigate()
 
     const getAllRequests = async () => {
+        setLoading(true)
         try {
             const requestsRef = collection(db, "requests")
             const querySnapshot = await getDocs(requestsRef);
@@ -40,6 +42,8 @@ const RewardRequest = () => {
             setAllRequests(data)
         } catch (err) {
             console.log("Error getting data:",  err)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -112,7 +116,7 @@ const RewardRequest = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredRewardRequest?.length / rewardRequestPerPage));
+        setTotalPages(Math.ceil(allRequests?.length / rewardRequestPerPage));
     }, [rewardRequestPerPage]);
 
      // Calculate indices for paginated data
@@ -167,7 +171,7 @@ const RewardRequest = () => {
                      <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] cursor-pointer outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
                     >
                         <option value="">Status</option>
                         <option value="Pending">Pending</option>
@@ -178,7 +182,7 @@ const RewardRequest = () => {
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
                     </div> */}
                     <div 
-                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] cursor-pointer gap-1 rounded-lg flex items-center p-3'
                         onClick={exportExcel}
                     >
                         <TbDownload className='text-base text-[#6B788E]' />
@@ -223,7 +227,16 @@ const RewardRequest = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        { currentRewardRequests?.length > 0 ?
+                        { loading ? 
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                    </div>
+                                </td>
+                            </tr>
+                           :  
+                            currentRewardRequests?.length > 0 ?
                             currentRewardRequests.map((item, index) => (
                                 <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     

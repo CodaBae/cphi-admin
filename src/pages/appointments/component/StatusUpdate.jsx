@@ -33,7 +33,7 @@ const StatusUpdate = ({ handleClose, clientData, updateLoadingB, setUpdateLoadin
     };
 
   return (
-    <div className='w-[668px] h-[381px] rounded-lg bg-[#fff] flex flex-col p-6 mt-[100px]  gap-[32px]'>
+    <div className='w-[668px] h-[481px] rounded-lg bg-[#fff] flex flex-col p-6 mt-[100px]  gap-[32px]'>
         <div className='flex items-center justify-between'>
             <p className='font-semibold text-[#1C1C1E] font-sans text-[18px]'>Doctor Info</p>
             <AiOutlineClose className='text-[#817F9B] cursor-pointer text-[24px]' onClick={handleClose} />
@@ -103,10 +103,11 @@ const StatusUpdate = ({ handleClose, clientData, updateLoadingB, setUpdateLoadin
 
                             <div className='flex flex-col gap-1 w-full'>
                                 <label className='font-sans text-[#1C1A3C] font-medium text-sm'>HIV Status</label>
-                                <select>
-                                    <option>Positive</option>
-                                    <option>Negative</option>
-                                    <option>Unconfirmed</option>
+                                <select name='hivStatus' onChange={handleChange} className='border border-[#E1E5F3] text-[#3A3A3C] font-poppins text-base p-2 border-solid outline-[#2D84FF] rounded-lg' value={values?.hivStatus}>
+                                    <option value="">Select Status</option>
+                                    <option value="Positive">Positive</option>
+                                    <option value="Negative">Negative</option>
+                                    <option value="Unconfirmed">Unconfirmed</option>
                                 </select>
                             </div>                            
                                                     

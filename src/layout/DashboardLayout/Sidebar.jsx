@@ -10,20 +10,28 @@ import { MdOutlineCardGiftcard } from 'react-icons/md'
 import { CiSettings } from 'react-icons/ci'
 import { PiUsersThree } from "react-icons/pi";
 import { BiUser } from 'react-icons/bi'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../features/adminLoginSlice'
 
 
 const Sidebar = ({ closeSidebar }) => {
+
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch()
+
+  const {user } = useSelector((state) => state.adminLogin)
+  const adminLogin = user?.userType
+  console.log(adminLogin, "adminLogin")
+
 
   const handleLogout = () => {
     dispatch(logout())
     navigate('/');
     closeSidebar();
   };
+
+
 
   return (
     <div className='border w-full flex flex-col items-center gap-5  bg-[#fff] py-[18px] px-[24px] h-full border-l-0 overflow-y-auto overflow-x-hidden border-t-0 border-r-[#E5E5EA]'>
@@ -80,16 +88,21 @@ const Sidebar = ({ closeSidebar }) => {
         <MdOutlineCardGiftcard  className={`${location.pathname === "/reward-request"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
         <p className={`${location.pathname === "/reward-request" ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Reward Request</p>
       </div>
-      <div 
-        className={`${location.pathname === "/settings"  ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} 
-        onClick={() => {
-          navigate('/settings');
-          closeSidebar();
-        }}
-      >
-        <CiSettings className={`${location.pathname === "/settings"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
-        <p className={`${location.pathname === "/settings" ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Settings</p>
-      </div>
+      {
+        adminLogin === "Super Admin" ? 
+        <div 
+          className={`${location.pathname === "/settings"  ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} 
+          onClick={() => {
+            navigate('/settings');
+            closeSidebar();
+          }}
+        >
+          <CiSettings className={`${location.pathname === "/settings"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
+          <p className={`${location.pathname === "/settings" ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Settings</p>
+        </div>
+        :
+        null
+      }
 
       <hr />
 

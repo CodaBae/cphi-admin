@@ -8,6 +8,7 @@ import AddReward from './AddReward'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../../firebase-config'
 import * as XLSX from "xlsx"
+import { CgSpinner } from 'react-icons/cg'
 
 const RewardDisplay = () => {
     const [search, setSearch] = useState("")
@@ -17,6 +18,7 @@ const RewardDisplay = () => {
     const [openAddReward, setOpenAddReward] = useState(false)
     const [rewardsData, setRewardsData] = useState([])
     const [loading, setLoading] = useState(false)
+    const [addLoading, setAddLoading] = useState(false)
 
     // const data = [
     //     {
@@ -45,6 +47,7 @@ const RewardDisplay = () => {
     // ]
 
     const getRewards = async () => {
+        setLoading(true)
         try {
             const rewardsRef = collection(db, "rewards")
             const querySnapshot = await getDocs(rewardsRef);
@@ -57,12 +60,14 @@ const RewardDisplay = () => {
             setRewardsData(data)
         } catch (err) {
             console.log("Failed to fetch doc", err)
+        } finally {
+            setLoading(false)
         }
     }
 
     useEffect(() => {
         getRewards()
-    }, [loading])
+    }, [addLoading])
 
     console.log(rewardsData, "rewardsData")
 
@@ -70,7 +75,7 @@ const RewardDisplay = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredReward?.length / rewardPerPage));
+        setTotalPages(Math.ceil(rewardsData?.length / rewardPerPage));
     }, [rewardPerPage]);
 
      // Calculate indices for paginated data
@@ -148,7 +153,16 @@ const RewardDisplay = () => {
                     </tr>
                 </thead>
                 <tbody className=''>
-                    { currentReward?.length > 0 ?
+                    {loading ? 
+                        <tr className='h-[300px] bg-white border-t border-grey-100'>
+                            <td colSpan="8" className="relative">
+                                <div className='absolute inset-0 flex items-center justify-center'>
+                                    <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                </div>
+                            </td>
+                        </tr>
+                        :   
+                        currentReward?.length > 0 ?
                         currentReward?.map((item, index) => (
                             <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                             
@@ -202,8 +216,8 @@ const RewardDisplay = () => {
         <ModalPop isOpen={openAddReward}>
             <AddReward 
                 handleClose={() => setOpenAddReward(false)}
-                loading={loading}
-                setLoading={setLoading} 
+                loading={addLoading}
+                setLoading={setAddLoading} 
             />
         </ModalPop>
 

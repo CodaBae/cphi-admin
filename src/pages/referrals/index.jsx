@@ -9,6 +9,7 @@ import Activity from "../../assets/svg/activity.svg"
 import { useNavigate } from 'react-router-dom'
 import { db } from '../../firebase-config'
 import { collection, getDocs, query, where } from 'firebase/firestore'
+import { CgSpinner } from 'react-icons/cg'
 
 const Referrals = () => {
     const [search, setSearch] = useState("")
@@ -17,6 +18,7 @@ const Referrals = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [allIndividuals, setAllIndividuals] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
+    const [loading, setLoading] = useState(false)
 
     const data = [
         {
@@ -57,7 +59,7 @@ const Referrals = () => {
 
     const getAllIndividuals = async () => {
         const orgsRef = collection(db, "users");
-    
+        setLoading(true)
         try {
             const q = query(orgsRef, where("type", "==", "Individual"));
             const querySnapshot = await getDocs(q);
@@ -71,6 +73,8 @@ const Referrals = () => {
             setAllIndividuals(individuals);
         } catch (err) {
             console.log(err, "Error fetching individuals ");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -117,7 +121,7 @@ const Referrals = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(data.length / referralsPerPage));
+        setTotalPages(Math.ceil(allIndividuals?.length / referralsPerPage));
     }, [referralsPerPage]);
 
      // Calculate indices for paginated data
@@ -174,7 +178,7 @@ const Referrals = () => {
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
                     </div> */}
                     <div 
-                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] cursor-pointer gap-1 rounded-lg flex items-center p-3'
                         onClick={exportExcel}
                     >
                         <TbDownload className='text-base text-[#6B788E]' />
@@ -216,7 +220,16 @@ const Referrals = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        {   currentReferrals?.length > 0 ?
+                        { loading ? 
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                    </div>
+                                </td>
+                            </tr>
+                           :   
+                            currentReferrals?.length > 0 ?
                             currentReferrals?.map((item, index) => (
                                 <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     

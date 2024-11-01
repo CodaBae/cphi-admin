@@ -12,6 +12,7 @@ import Logo from "../assets/svg/logo_small.svg"
 import Activity from "../assets/svg/activity.svg"
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase-config';
+import { CgSpinner } from 'react-icons/cg';
 
 
 const ReferralDetails = () => {
@@ -20,6 +21,7 @@ const ReferralDetails = () => {
     const [referralsPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
     const [referrals, setReferrals] = useState([])
+    const [loading, setLoading] = useState(false)
     
 
     const qrRef = useRef();
@@ -51,6 +53,7 @@ const ReferralDetails = () => {
 
     const referrerCode = userDetails?.referrerCode
     const getReferrals = async () => {
+        setLoading(true)
         try {
             const q = query(
                 collection(db, 'referrals'),
@@ -65,6 +68,8 @@ const ReferralDetails = () => {
             
         } catch (err) {
             console.error("Error fetching user details:", err);
+        } finally {
+            setLoading(false)
         }
     };
     
@@ -77,43 +82,6 @@ const ReferralDetails = () => {
     }, [referrerCode]);
 
 
-    
-
-    const data = [
-        {
-            id: "#302010",
-            date: "12/8/2024",
-            name: "Heala Tech",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            status: "No Show"
-        },
-        {
-            id: "#302011",
-            date: "12/8/2024",
-            name: "Joy Johnson",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            status: "Completed"
-        },
-        {
-            id: "#302012",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            status: "Completed"
-        },
-        {
-            id: "#302013",
-            date: "12/8/2024",
-            name: "John Doe",
-            email: "mercy.p@mail.com",
-            phone: "09034543234",
-            status: "Completed"
-        },
-    ]
-
     const filteredReferrals = referrals?.filter((item) => (
         item.profile.fullName.toLowerCase().includes(search.toLowerCase()) || 
         item.profile.emailOrphone.toLowerCase().includes(search.toLowerCase())
@@ -121,7 +89,7 @@ const ReferralDetails = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredReferrals?.length / referralsPerPage));
+        setTotalPages(Math.ceil(referrals?.length / referralsPerPage));
     }, [referralsPerPage]);
 
      // Calculate indices for paginated data
@@ -130,7 +98,7 @@ const ReferralDetails = () => {
      const currentReferrals = filteredReferrals?.slice(indexOfFirstReferral, indexOfLastReferral);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReferrals?.length / referralsPerPage)) {
+         if (currentPage < Math.ceil(referrals?.length / referralsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -227,7 +195,16 @@ const ReferralDetails = () => {
                         </tr>
                     </thead>
                     <tbody className=''>
-                        { currentReferrals?.length > 0 ?
+                        { loading ? 
+                            <tr className='h-[300px] bg-white border-t border-grey-100'>
+                                <td colSpan="8" className="relative">
+                                    <div className='absolute inset-0 flex items-center justify-center'>
+                                        <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                                    </div>
+                                </td>
+                            </tr>
+                           :
+                            currentReferrals?.length > 0 ?
                             currentReferrals?.map((item, index) => (
                                 <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]' >
                                     

@@ -14,6 +14,7 @@ import ModalPop from '../../../components/modalPop'
 import AddAdmin from './AddAdmin'
 import EditAdmin from './EditAdmin'
 import DeleteAdmin from './DeleteAdmin'
+import { CgSpinner } from 'react-icons/cg'
 
 const AdminAccess = () => {
     const [search, setSearch] = useState("")
@@ -29,6 +30,7 @@ const AdminAccess = () => {
     const [editDataLoading, setEditDataLoading] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
     const [adminFilter, setAdminFilter] = useState("")
+    const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
     
@@ -68,6 +70,7 @@ const AdminAccess = () => {
     ]
 
     const getAllAdmins = async () => {
+        setLoading(true)
         try {
             const adminsRef = collection(db, "admins")
             const querySnapshot = await getDocs(adminsRef);
@@ -80,6 +83,8 @@ const AdminAccess = () => {
             setAllAdmins(data)
         } catch (err) {
             console.log("Error getting data:",  err)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -134,7 +139,7 @@ const AdminAccess = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredAdmin?.length / adminPerPage));
+        setTotalPages(Math.ceil(allAdmins?.length / adminPerPage));
     }, [adminPerPage]);
 
      // Calculate indices for paginated data
@@ -143,7 +148,7 @@ const AdminAccess = () => {
      const currentAdmin = filteredAdmin?.slice(indexOfLastAdmin, indexOfFirstAdmin);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentAdmin?.length / adminPerPage)) {
+         if (currentPage < Math.ceil(allAdmins?.length / adminPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -176,7 +181,7 @@ const AdminAccess = () => {
             <select
                 value={adminFilter}
                 onChange={(e) => setAdminFilter(e.target.value)}
-                className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
+                className="w-full sm:w-[120px] h-[40px] border cursor-pointer border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
             >
                 <option value="">Type</option>
                 <option value="Super Admin">Super Admin</option>
@@ -187,7 +192,7 @@ const AdminAccess = () => {
                 <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
             </div> */}
             <div 
-                className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                className='w-full lg:w-[87px] h-[40px] cursor-pointer border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
                 onClick={exportExcel}
             >
                 <TbDownload className='text-base text-[#6B788E]' />
@@ -232,7 +237,16 @@ const AdminAccess = () => {
                 </tr>
             </thead>
             <tbody className=''>
-                {currentAdmin?.length > 0 ?
+                {loading ? 
+                    <tr className='h-[300px] bg-white border-t border-grey-100'>
+                        <td colSpan="8" className="relative">
+                            <div className='absolute inset-0 flex items-center justify-center'>
+                                <CgSpinner className='animate-spin text-[#2D84FF] text-[200px]' /> 
+                            </div>
+                        </td>
+                    </tr>
+                    :   
+                    currentAdmin?.length > 0 ?
                     currentAdmin?.map((item, index) => (
                         <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                             
