@@ -39,7 +39,7 @@ const ReferralDetails = () => {
 
     console.log(userDetails, "userDetails")
 
-    const referrerUrl = `https://cphi-main.vercel.app/${userDetails.referrerCode || ''}`; 
+    const referrerUrl = `https://cphi-social.vercel.app/${userDetails.referrerCode || ''}`; 
 
     const downloadQRCode = () => {
         const canvas = qrRef.current.querySelector('canvas');
