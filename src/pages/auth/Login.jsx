@@ -87,7 +87,7 @@ const Login = () => {
                         values,
                     }) => (
                         <Form onSubmit={handleSubmit} className="flex justify-center ">
-                            <div className="flex flex-col  w-[520px] gap-6">
+                            <div className="flex flex-col w-[320px] lg:w-[520px] gap-6">
 
                                 <div className='flex flex-col w-full'>
                                     <input

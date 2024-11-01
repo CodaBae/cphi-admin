@@ -145,8 +145,8 @@ const ReferralDetails = () => {
 
   return (
     <div className='w-full mt-[10px]'>
-        <div className='flex items-center gap-[10px]'>
-            <div className='w-[336px] rounded-lg h-auto border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+        <div className='flex items-center flex-col lg:flex-row gap-[10px]'>
+            <div className='w-full lg:w-[336px] rounded-lg h-auto border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center cursor-pointer justify-between' onClick={() => copyToClipboard(referrerUrl)}>
                     <p className='font-sans text-sm text-[#424242]'>{referrerUrl}</p>
                     <BiSolidCopy className='text-[#2D84FF] w-5 h-5' />
@@ -161,7 +161,7 @@ const ReferralDetails = () => {
                 </div>
                  
             </div>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Referrals</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -175,9 +175,9 @@ const ReferralDetails = () => {
         </div>
 
         <div className='w-full mt-10'>
-            <div className='flex items-center justify-between px-5'>
+            <div className='flex items-center justify-between flex-col lg:flex-row px-5'>
                 <p className='font-sans text-[18px] font-medium text-[#1C1C1E]'>Referrals</p>
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center flex-col lg:flex-row gap-3'>
                     <input 
                         className='w-[290px] h-[40px] outline-[#2D84FF] rounded-lg p-2 border border-[#E1E5F3]'
                         type='text'
@@ -185,11 +185,11 @@ const ReferralDetails = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'>
+                    <div className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'>
                         <CiFilter className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Status</p>
                     </div>
-                    <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'>
+                    <div className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'>
                         <TbDownload className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Export</p>
                     </div>
@@ -198,7 +198,7 @@ const ReferralDetails = () => {
                 </div>
             </div>
 
-            <div className='mt-5 p-5 w-full'>
+            <div className='mt-5 p-5 w-full overflow-x-auto'>
                 <table>
                     <thead>
                         <tr className='w-full border rounded-t-xl border-[#F0F1F3] '>
@@ -275,41 +275,23 @@ const ReferralDetails = () => {
                 </table>
             </div>
     
-            <div className='w-full flex items-center justify-between p-5'>
-                <div className='bg-[#FAFAFE] w-[136px] h-[40px] flex items-center justify-center'>
-                    <p className='font-sans text-[#667085] text-base'>Page 1 of 1</p>
+            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+                <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
+                    <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
-
-                <div>
-                    <div className='flex h-[34px] justify-center  w-full gap-2 items-center'>
-
-                        <div 
-                            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)} 
-                            className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out  flex justify-center items-center cursor-pointer w-8 h-full  ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            <IoIosArrowBack className='text-[#667085] hover:text-[#fff]'/>
+                <div className='flex h-[34px] justify-center gap-2 items-center mt-4 sm:mt-0'>
+                    <div onClick={() => handlePrevPage()} className={`bg-[#FAFAFE] w-8 h-8 flex justify-center items-center cursor-pointer ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}>
+                        <IoIosArrowBack className='text-[#667085]' />
+                    </div>
+                    {[...Array(totalPages)].map((_, index) => (
+                        <div key={index} onClick={() => setCurrentPage(index + 1)} className={`flex justify-center items-center w-8 h-8 cursor-pointer ${currentPage === index + 1 ? 'bg-[#FAFAFE] text-[#000]' : 'hover:bg-[#FAFAFE]'}`}>
+                            {index + 1}
                         </div>
-
-                        {[...Array(totalPages)].map((_, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={() => setCurrentPage(index + 1)} 
-                                    className={`transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full bg-[#FAFAFE] ${currentPage === index + 1 ? 'bg-[#FAFAFE] text-[#000]' : 'hover:bg-[#FAFAFE]'}`}
-                                >
-                                    {index + 1}
-                                </div>
-                            ))}
-
-
-                        <div 
-                            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)} 
-                            className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full  bg-[#FAFAFE] ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            <IoIosArrowForward className='text-[#667085] hover:text-[#fff]'/>
-                        </div>
+                    ))}
+                    <div onClick={() => handleNextPage()} className={`bg-[#FAFAFE] w-8 h-8 flex justify-center items-center cursor-pointer ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}>
+                        <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-
             </div>
 
         </div>

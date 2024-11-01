@@ -71,7 +71,7 @@ const AddReward = ({ handleClose, loading, setLoading }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder=''
                 value={description}
-                className='border-[#E1E5F3] p-2 border outline-[#2D84FF] w-[620px] h-[64px] rounded-lg'
+                className='border-[#E1E5F3] p-2 border outline-[#2D84FF] w-full lg:w-[620px] h-[64px] rounded-lg'
             >
             </textarea>
         </div>

@@ -20,7 +20,7 @@ const Details = () => {
                 </div>
             </div>
         </div>
-        <div className='w-[620px] h-[515px] flex flex-col mt-[32px] gap-10'>
+        <div className='lg:w-[620px] h-[515px] flex flex-col mt-[32px] gap-10'>
             <div className='flex items-center gap-5'>
                 <div className='flex flex-col w-[300px] gap-2'>
                     <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Name</p>

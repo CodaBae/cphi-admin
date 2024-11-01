@@ -118,7 +118,7 @@ const PageContent = () => {
                     touched,
                     values,
                 }) => (
-                    <Form onSubmit={handleSubmit} className="flex flex-col w-[520px] gap-6">
+                    <Form onSubmit={handleSubmit} className="flex flex-col w-[320px] lg:w-[520px] gap-6">
                         <div className='flex flex-col gap-1 w-full'>
                             <label className='font-sans text-[#1C1A3C] font-medium text-sm'>Heading Text</label>
                             <input
@@ -149,7 +149,7 @@ const PageContent = () => {
 
                         <div className='flex flex-col gap-1'>
                             <label className='font-sans text-[#1C1A3C] font-medium text-sm'>Image</label>
-                            <div className='w-[502px] h-auto rounded-lg flex p-3 items-center justify-between bg-[#FAFAFA]'>
+                            <div className='lg:w-[502px] h-auto rounded-lg flex p-3 items-center justify-between bg-[#FAFAFA]'>
                                 <input 
                                     type='text'
                                     name="link"

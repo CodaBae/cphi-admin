@@ -54,7 +54,7 @@ const ResetPassword = () => {
        
         <div className='w-full  mt-[20px] gap-[56px]  flex flex-col items-center justify-center '>
            
-            <div className='flex flex-col items-center gap-1'>
+            <div className='flex flex-col w-11/12 lg:w-full items-center gap-1'>
                 <p className='text-[#1C1C1E] font-poppins text-[26px] lg:text-[34px] font-bold'>Reset Password</p>
                 <p className='font-sans text-sm text-[#1C1C1E]'>An email containing a 5 digit OTP Code has been sent to your email</p>
             </div>
@@ -83,7 +83,7 @@ const ResetPassword = () => {
                         values,
                     }) => (
                         <Form onSubmit={handleSubmit} className="flex justify-center ">
-                            <div className="flex flex-col  w-[520px] gap-6">
+                            <div className="flex flex-col w-[320px] lg:w-[520px] gap-6">
 
                                 
                                 <div className='flex flex-col  w-full'>

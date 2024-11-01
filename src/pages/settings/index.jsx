@@ -15,7 +15,7 @@ const Settings = () => {
     <div className='flex flex-col gap-[21px]'>
         <p className='font-semibold text-[#1C1C1E] text-[18px] font-sans'>Settings</p>
 
-        <div className='flex items-center gap-5'>
+        <div className='flex items-center overflow-x-auto gap-5'>
             <div onClick={() => handleChangeTab("Page Content")} className={`${activeTab === "Page Content" ? "border-[#2D84FF]" : "border-b-0"} border border-t-0 p-2 cursor-pointer border-x-0`}>
                 <p className={`${activeTab === "Page Content" ? "text-[#2D84FF]" : "text-[#575757]" } font-semibold font-sans text-base`}>Page Content</p>
             </div>

@@ -162,8 +162,8 @@ const Appointments = () => {
 
   return (
     <div className='mt-[30px] w-full'>
-        <div className='flex items-center gap-[10px]'>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+        <div className='flex flex-col lg:flex-row items-center gap-[10px]'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Appointments</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -174,7 +174,7 @@ const Appointments = () => {
                     <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allPendingAppointments?.length || 0}</p>
                 </div>
             </div>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Completed</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -185,7 +185,7 @@ const Appointments = () => {
                     <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allCompletedAppointments?.length || 0}</p>
                 </div>
             </div>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total No Show</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -199,9 +199,9 @@ const Appointments = () => {
         </div>
 
         <div className='w-full mt-10'>
-            <div className='flex items-center justify-between px-5'>
+            <div className='flex flex-col lg:flex-row items-center justify-between px-5'>
                 <p className='font-sans text-[18px] font-medium text-[#1C1C1E]'>Appointments</p>
-                <div className='flex items-center gap-3'>
+                <div className='flex flex-col lg:flex-row items-center gap-3'>
                     <input 
                         className='w-[290px] h-[40px] outline-[#2D84FF] rounded-lg p-2 border border-[#E1E5F3]'
                         type='text'
@@ -229,7 +229,7 @@ const Appointments = () => {
                         <option value="Completed">Completed</option>
                     </select>
                     <div 
-                        className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
+                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
                         onClick={exportExcel}
                     >
                         <TbDownload className='text-base text-[#6B788E]' />
@@ -238,7 +238,7 @@ const Appointments = () => {
                 </div>
             </div>
 
-            <div className='mt-5 p-5 w-full'>
+            <div className='mt-5 p-5 w-full overflow-x-auto'>
                 <table>
                     <thead>
                         <tr className='w-full border rounded-t-xl border-[#F0F1F3] '>
@@ -341,41 +341,23 @@ const Appointments = () => {
               
             </div>
     
-            <div className='w-full flex items-center justify-between p-5'>
-                <div className='bg-[#FAFAFE] w-[136px] h-[40px] flex items-center justify-center'>
+            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+                <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
                     <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
-
-                <div>
-                    <div className='flex h-[34px] justify-center  w-full gap-2 items-center'>
-
-                        <div 
-                            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)} 
-                            className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out  flex justify-center items-center cursor-pointer w-8 h-full  ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            <IoIosArrowBack className='text-[#667085] hover:text-[#fff]'/>
+                <div className='flex h-[34px] justify-center gap-2 items-center mt-4 sm:mt-0'>
+                    <div onClick={() => handlePrevPage()} className={`bg-[#FAFAFE] w-8 h-8 flex justify-center items-center cursor-pointer ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}>
+                        <IoIosArrowBack className='text-[#667085]' />
+                    </div>
+                    {[...Array(totalPages)].map((_, index) => (
+                        <div key={index} onClick={() => setCurrentPage(index + 1)} className={`flex justify-center items-center w-8 h-8 cursor-pointer ${currentPage === index + 1 ? 'bg-[#FAFAFE] text-[#000]' : 'hover:bg-[#FAFAFE]'}`}>
+                            {index + 1}
                         </div>
-
-                        {[...Array(totalPages)].map((_, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={() => setCurrentPage(index + 1)} 
-                                    className={`transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full bg-[#FAFAFE] ${currentPage === index + 1 ? 'bg-[#FAFAFE] text-[#000]' : 'hover:bg-[#FAFAFE]'}`}
-                                >
-                                    {index + 1}
-                                </div>
-                            ))}
-
-
-                        <div 
-                            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)} 
-                            className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full  bg-[#FAFAFE] ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            <IoIosArrowForward className='text-[#667085] hover:text-[#fff]'/>
-                        </div>
+                    ))}
+                    <div onClick={() => handleNextPage()} className={`bg-[#FAFAFE] w-8 h-8 flex justify-center items-center cursor-pointer ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}>
+                        <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-
             </div>
 
         </div>

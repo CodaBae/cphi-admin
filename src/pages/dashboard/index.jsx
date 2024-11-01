@@ -41,6 +41,8 @@ const Dashboard = () => {
         }
     };
 
+    console.log(allAppointments, "slik")
+
     const getAllOrgs = async () => {
         const orgsRef = collection(db, "users");
     
@@ -130,21 +132,21 @@ const Dashboard = () => {
           },
         },
         stroke: {
-          curve: 'smooth', // Makes the line smooth
-          width: 3, // Thickness of the line
+          curve: 'smooth', 
+          width: 3, 
         },
         xaxis: {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], // Months
+          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
         },
         yaxis: {
           labels: {
-            formatter: (val) => `${val}k`, // Adds 'k' for thousands
+            formatter: (val) => `${val}k`, 
           },
           min: 0,
-          max: 120, // Max limit of the Y axis
+          max: 120, 
         },
         dataLabels: {
-          enabled: false, // Disable data points on the line
+          enabled: false, 
         },
         fill: {
           type: 'gradient',
@@ -152,7 +154,7 @@ const Dashboard = () => {
             shade: 'light',
             type: 'vertical',
             shadeIntensity: 0.5,
-            gradientToColors: ['#A0F9B9'], // Gradient to a lighter green
+            gradientToColors: ['#A0F9B9'], 
             inverseColors: false,
             opacityFrom: 0.6,
             opacityTo: 0.1,
@@ -160,27 +162,27 @@ const Dashboard = () => {
           },
         },
         grid: {
-          strokeDashArray: 4, // Dotted lines in the background
+          strokeDashArray: 4, 
         },
         colors: ['#00E396'], // Line color
       });
     
-      const [chartSeries, setChartSeries] = useState([
+    const [chartSeries, setChartSeries] = useState([
         {
-          name: 'Revenue',
-          data: [60, 75, 55, 90, 80, 70, 95, 85, 110, 100, 105, 115], // Sample data points
+          name: 'Referral Growth',
+          data: [60, 75, 55, 90, 80, 70, 95, 85, 110, 100, 105, 115], 
         },
       ]);
 
 
       const chartData = {
-        series: [115900, 57000], // Completed, Pending, Overdue
+        series: [115900, 57000], 
         options: {
           chart: {
             type: 'donut',
           },
           labels: ['Pay In', 'Pay out'],
-          colors: ['#10B981', '#F59E0B'], // Colors for the segments
+          colors: ['#10B981', '#F59E0B'], 
           legend: {
             show: false,
             position: 'right',
@@ -279,8 +281,8 @@ const Dashboard = () => {
 
   return (
     <div className='mt-[30px] w-full'>
-        <div className='flex items-center gap-[10px]'>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+        <div className='flex flex-col lg:flex-row items-center gap-[10px]'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Appointments</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -291,7 +293,7 @@ const Dashboard = () => {
                     <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allAppointments?.length || 0}</p>
                 </div>
             </div>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Orgs</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -302,7 +304,7 @@ const Dashboard = () => {
                     <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allOrgs?.length || 0}</p>
                 </div>
             </div>
-            <div className='w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Refferal</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -315,8 +317,8 @@ const Dashboard = () => {
             </div>
         </div>
 
-        <div className='flex items-center gap-5 mt-5'>
-            <div className='flex flex-col w-6/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
+        <div className='flex flex-col lg:flex-row items-center gap-5 mt-5'>
+            <div className='flex flex-col w-full lg:w-6/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
             <div className='flex items-center justify-between'>
                 <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Referral Growth</p>
                 <div className='flex items-center justify-center gap-4 border border-[#E5E5EA] rounded-lg h-[42px] w-[80px]'>
@@ -329,7 +331,7 @@ const Dashboard = () => {
             </div>
             </div>
 
-            <div className='flex flex-col w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
+            <div className='flex flex-col w-full lg:w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
                 <div className='flex items-center justify-between'>
                     <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Services Rank</p>
                     <div className='flex items-center justify-center gap-4 border border-[#E5E5EA] rounded-lg h-[32px] w-[80px]'>
@@ -337,14 +339,14 @@ const Dashboard = () => {
                         <p className='font-sans text-[#1C1A3C] font-medium text-xs'>2024</p>
                     </div>
                 </div>
-                <div className='mt-5 flex items-center gap-[98px]'>
+                <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
                     <Chart
                         options={chartData.options}
                         series={chartData.series}
                         type='donut'
                         height={240}
                     />
-                    <div className='flex flex-col gap-6'>
+                    <div className='flex flex-row flex-wrap lg:flex-col gap-6'>
                         <div className='flex items-start gap-4'>
                             <div className='w-[8px] h-[8px] rounded-full mt-1 bg-[#1EC677]'></div>
                             <div className='flex flex-col'>
@@ -368,7 +370,7 @@ const Dashboard = () => {
         <div className='flex flex-col mt-[25px] gap-3'>
             <p className='font-semibold text-[#1C1C1E] teaxt-lg'>Leaderboard</p>
 
-            <div className='py-5 w-full'>
+            <div className='py-5 w-full overflow-x-auto'>
                 <table>
                     <thead>
                         <tr className='w-full border rounded-t-xl border-[#F0F1F3] '>
@@ -449,43 +451,23 @@ const Dashboard = () => {
                 </table>
             </div>
     
-            <div className='w-full flex items-center justify-between p-5'>
-                <div className='bg-[#FAFAFE] w-[136px] h-[40px] flex items-center justify-center'>
+            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+                <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
                     <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
-
-                <div>
-                    <div className='flex h-[34px] justify-center  w-full gap-2 items-center'>
-
-                        <div 
-                            // onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)} 
-                            onClick={() => handlePrevPage()} 
-                            className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out  flex justify-center items-center cursor-pointer w-8 h-full  ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            <IoIosArrowBack className='text-[#667085] hover:text-[#fff]'/>
+                <div className='flex h-[34px] justify-center gap-2 items-center mt-4 sm:mt-0'>
+                    <div onClick={() => handlePrevPage()} className={`bg-[#FAFAFE] w-8 h-8 flex justify-center items-center cursor-pointer ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}>
+                        <IoIosArrowBack className='text-[#667085]' />
+                    </div>
+                    {[...Array(totalPages)].map((_, index) => (
+                        <div key={index} onClick={() => setCurrentPage(index + 1)} className={`flex justify-center items-center w-8 h-8 cursor-pointer ${currentPage === index + 1 ? 'bg-[#FAFAFE] text-[#000]' : 'hover:bg-[#FAFAFE]'}`}>
+                            {index + 1}
                         </div>
-
-                        {[...Array(totalPages)].map((_, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={() => setCurrentPage(index + 1)} 
-                                    className={`transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full bg-[#FAFAFE] ${currentPage === index + 1 ? 'bg-[#FAFAFE] text-[#000]' : 'hover:bg-[#FAFAFE]'}`}
-                                >
-                                    {index + 1}
-                                </div>
-                            ))}
-
-
-                        <div 
-                            // onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)} 
-                            onClick={() => handleNextPage()}
-                            className={`bg-[#FAFAFE] transition-all duration-500 ease-in-out flex justify-center items-center cursor-pointer w-8 h-full  bg-[#FAFAFE] ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            <IoIosArrowForward className='text-[#667085] hover:text-[#fff]'/>
-                        </div>
+                    ))}
+                    <div onClick={() => handleNextPage()} className={`bg-[#FAFAFE] w-8 h-8 flex justify-center items-center cursor-pointer ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}>
+                        <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-
             </div>
 
         </div>
