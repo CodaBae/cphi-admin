@@ -185,7 +185,6 @@ const Appointments = () => {
     const updateStatus = async (item) => {
         setUpdateLoading(true)
         try {
-            
             const appointmentRef = doc(db, 'referrals', item.id);
 
             await updateDoc(appointmentRef, {
