@@ -11,6 +11,7 @@ import Activity from "../../assets/svg/activity.svg"
 
 import { db } from '../../firebase-config';
 import { CgSpinner } from 'react-icons/cg';
+import { useSelector } from 'react-redux';
 
 const Orgs = () => {
     const [search, setSearch] = useState("")
@@ -24,12 +25,17 @@ const Orgs = () => {
 
     const navigate = useNavigate()
 
+    const { user } = useSelector((state) => state.adminLogin)
+    const adminLoginType = user?.userType
+    const adminName = user?.fullName
+
+
     
     const getAllOrgs = async () => {
         const orgsRef = collection(db, "users");
         setLoading(true)
         try {
-            const q = query(orgsRef, where("type", "==", "Organization"));
+            const q = adminLoginType === "Admin" ? query(orgsRef, where("type", "==", "Organization"), where('addedBy', '==', adminName)) :  query(orgsRef, where("type", "==", "Organization"));
             const querySnapshot = await getDocs(q);
     
             const orgs = querySnapshot.docs.map(doc => ({

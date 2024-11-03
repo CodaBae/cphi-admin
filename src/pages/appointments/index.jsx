@@ -12,6 +12,8 @@ import ModalPop from '../../components/modalPop'
 import StatusUpdate from './component/StatusUpdate'
 import { CgSpinner } from 'react-icons/cg'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Appointments = () => {
     const [currentPage, setCurrentPage] = useState(1)
@@ -29,6 +31,13 @@ const Appointments = () => {
     const [updateLoading, setUpdateLoading] = useState(false)
     const [updateLoadingB, setUpdateLoadingB] = useState(false)
     const [loading, setLoading] = useState(true)
+
+    const navigate = useNavigate()
+
+    const { user } = useSelector((state) => state.adminLogin)
+    const adminLoginType = user?.userType
+    const adminLoginReferrerCode = user?.referrerCode
+
 
     const getAllAppointments = async () => {
         const referralsRef = collection(db, "referrals");
@@ -50,13 +59,38 @@ const Appointments = () => {
         }
     };
 
+    const getReferrals = async () => {
+        setLoading(true)
+        try {
+            const q = query(
+                collection(db, 'referrals'),
+                where('referrerCode', '==', adminLoginReferrerCode)
+            );
+            
+            const querySnapshot = await getDocs(q);
+            
+            // const userData = querySnapshot.docs.map(doc => doc.data());
+            const userData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            setAllAppointments(userData);
+            
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+        } finally {
+            setLoading(false)
+        }
+    };
+
     const getAllAppointmentsByStatus = async () => {
         const referralsRef = collection(db, "referrals");
     
         try {
-            const p = query(referralsRef, where("status", "==", "Pending"));
-            const n = query(referralsRef, where("status", "==", "No Show"));
-            const c = query(referralsRef, where("status", "==", "Completed"));
+            const p = adminLoginType === "Admin" ? query(referralsRef, where("status", "==", "Pending"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "Pending")) ;
+            const n = adminLoginType === "Admin" ? query(referralsRef, where("status", "==", "No Show"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "No Show"));
+            const c = adminLoginType === "Admin" ? query(referralsRef, where("status", "==", "Completed"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "Completed")) ;
             const pendingQuerySnapshot = await getDocs(p);
             const noShowQuerySnapshot = await getDocs(n);
             const completedQuerySnapshot = await getDocs(c);
@@ -88,7 +122,11 @@ const Appointments = () => {
     };
 
     useEffect(() => {
-        getAllAppointments()
+        if(adminLoginType === "Admin") {
+            getReferrals()
+        } else {
+            getAllAppointments()
+        }
         getAllAppointmentsByStatus()
     }, [updateLoading, updateLoadingB])
 
@@ -293,7 +331,7 @@ const Appointments = () => {
                                             <p className='font-sans text-[#667085] font-medium text-sm'>{item?.time}</p>
                                         </div>
                                     </td>
-                                    <td className='w-[198px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
+                                    <td className='w-[198px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium cursor-pointer' onClick={() => {navigate("/client/details", {state: item}), window.scrollTo(0, 0)}}>
                                         <div className='flex flex-col gap-1'>
                                             <p className='font-sans text-[#333843] font-medium text-sm '>{item?.profile?.fullName}</p>
                                         </div>
@@ -325,11 +363,11 @@ const Appointments = () => {
                                     </td>
                                     <td className='w-[157px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
                                         <div className="flex items-center gap-2">
-                                           <div className='bg-[#F4003D1A] p-2 rounded-lg cursor-pointer' onClick={() => updateStatus(item)}>
-                                                <p className='text-[#F4003D] font-sans whitespace-nowrap'>{updateLoading ? <CgSpinner className=" animate-spin text-lg " /> : 'No Show'}</p>
+                                           <div className='bg-[#F4003D] p-2 rounded-xl cursor-pointer' onClick={() => updateStatus(item)}>
+                                                <p className='text-[#FFF] font-sans whitespace-nowrap'>{updateLoading ? <CgSpinner className=" animate-spin text-lg text-[#FFF]" /> : 'No Show'}</p>
                                            </div>
-                                           <div className='bg-[#1EC6771A] p-2 cursor-pointer rounded-lg' onClick={() => {setShowModal(true), setClientData(item)}}>
-                                                <p className='text-[#1EC677] font-sans whitespace-nowrap'>{updateLoadingB ? <CgSpinner className=" animate-spin text-lg " /> : 'Completed'}</p>
+                                           <div className='bg-[#1EC677] p-2 cursor-pointer rounded-xl' onClick={() => {setShowModal(true), setClientData(item)}}>
+                                                <p className='text-[#FFFFFF] font-sans whitespace-nowrap'>{updateLoadingB ? <CgSpinner className=" animate-spin text-lg text-[#FFF]" /> : 'Completed'}</p>
                                            </div>
                                         </div>
                                     </td>

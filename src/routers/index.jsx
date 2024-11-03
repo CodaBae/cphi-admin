@@ -16,6 +16,7 @@ import ReferralDetails from '../components/ReferralDetails'
 import AddOrgs from '../pages/orgs/components/AddOrgs'
 import AddIndividual from '../pages/referrals/components/AddIndividual'
 import Settings from '../pages/settings'
+import ProtectRoute from './ProtectRoute'
 
 
 const Routers = () => {
@@ -28,16 +29,16 @@ const Routers = () => {
         </Route>
    
         <Route element={<DashboardLayout />}>
-            <Route path='/dashboard' element={<Dashboard />} />
-            <Route path='/appointments' element={<Appointments />} />
-            <Route path='/individuals' element={<Referrals />} />
-            <Route path='/referrals/details' element={<ReferralDetails />} />
-            <Route path='/settings' element={<Settings />} />
-            <Route path='/orgs/add' element={<AddOrgs />} />
-            <Route path='/individuals/add' element={<AddIndividual />} />
-            <Route path='/orgs' element={<Orgs />} />
-            <Route path='/reward-request' element={<RewardRequest />} />
-            <Route path='/client/details' element={<Details />} />
+            <Route path='/dashboard' element={<ProtectRoute><Dashboard /></ProtectRoute>} />
+            <Route path='/appointments' element={<ProtectRoute><Appointments /></ProtectRoute>} />
+            <Route path='/individuals' element={<ProtectRoute><Referrals /></ProtectRoute>} />
+            <Route path='/referrals/details' element={<ProtectRoute><ReferralDetails /></ProtectRoute>} />
+            <Route path='/settings' element={<ProtectRoute><Settings /></ProtectRoute>} />
+            <Route path='/orgs/add' element={<ProtectRoute><AddOrgs /></ProtectRoute>} />
+            <Route path='/individuals/add' element={<ProtectRoute><AddIndividual /></ProtectRoute>} />
+            <Route path='/orgs' element={<ProtectRoute><Orgs /></ProtectRoute>} />
+            <Route path='/reward-request' element={<ProtectRoute><RewardRequest /></ProtectRoute>} />
+            <Route path='/client/details' element={<ProtectRoute><Details /></ProtectRoute>} />
         
         </Route>
     

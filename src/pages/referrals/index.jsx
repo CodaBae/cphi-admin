@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { db } from '../../firebase-config'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { CgSpinner } from 'react-icons/cg'
+import { useSelector } from 'react-redux'
 
 const Referrals = () => {
     const [search, setSearch] = useState("")
@@ -20,48 +21,20 @@ const Referrals = () => {
     const [referralTotals, setReferralTotals] = useState({})
     const [loading, setLoading] = useState(false)
 
-    const data = [
-        {
-            id: "#302010",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302011",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302012",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-        {
-            id: "#302013",
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-            phone: "09034543234",
-            total: 5
-        },
-    ]
 
     const navigate = useNavigate()
+
+    const { user } = useSelector((state) => state.adminLogin)
+    const adminLoginType = user?.userType
+    const adminName = user?.fullName
+
+   
 
     const getAllIndividuals = async () => {
         const orgsRef = collection(db, "users");
         setLoading(true)
         try {
-            const q = query(orgsRef, where("type", "==", "Individual"));
+            const q = adminLoginType === "Admin" ? query(orgsRef, where("type", "==", "Individual"), where('addedBy', '==', adminName)) : query(orgsRef, where("type", "==", "Individual"));
             const querySnapshot = await getDocs(q);
     
             const individuals = querySnapshot.docs.map(doc => ({

@@ -12,6 +12,7 @@ import Activity from "../../assets/svg/activity.svg"
 import { db } from '../../firebase-config'
 import { CgSpinner } from 'react-icons/cg'
 import { toast } from 'react-toastify'
+import { useSelector } from 'react-redux'
 
 
 const RewardRequest = () => {
@@ -28,11 +29,16 @@ const RewardRequest = () => {
     
     const navigate = useNavigate()
 
+    const { user } = useSelector((state) => state.adminLogin)
+    const adminLoginType = user?.userType
+    const adminName = user?.fullName
+
     const getAllRequests = async () => {
         setLoading(true)
         try {
             const requestsRef = collection(db, "requests")
-            const querySnapshot = await getDocs(requestsRef);
+            const q = query(requestsRef, where('userDetails.addedBy', '==', adminName));
+            const querySnapshot = adminLoginType === "Admin" ? await getDocs(q)  : await getDocs(requestsRef);
 
             const data = querySnapshot.docs.map(doc => ({
                 id: doc.id,

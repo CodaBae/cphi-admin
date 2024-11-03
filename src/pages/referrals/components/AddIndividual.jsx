@@ -8,17 +8,22 @@ import * as Yup from "yup"
 import { db } from '../../../firebase-config';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 const AddIndividual = () => {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0); 
 
+    const { user } = useSelector((state) => state.adminLogin)
+    const adminName = user?.fullName
+
+    const navigate = useNavigate()
+
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
-    const navigate = useNavigate()
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -53,6 +58,7 @@ const AddIndividual = () => {
             await setDoc(doc(db, 'users', values.emailOrPhone), {
                 ...values,
                 type: "Individual",
+                addedBy: adminName,
                 referrerCode,
                 checked: true,
                 createdAt: new Date(),

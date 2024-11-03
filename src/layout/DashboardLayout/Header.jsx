@@ -23,7 +23,7 @@ const Header = ({ toggleSidebar }) => {
        
         <div className='flex items-center gap-6'>
             <div className='flex items-center gap-3'>
-                <div className='w-[100px] lg:w-[254px] flex items-center bg-[#0000000D] rounded-lg h-[36px] '>
+                <div className='w-[100px] lg:w-[254px] invisible flex items-center bg-[#0000000D] rounded-lg h-[36px] '>
                     <div className='bg-[#0000000D] h-full rounded-tl-lg rounded-bl-lg flex items-center p-2'>
                         <IoSearch className='w-4 h-4 text-[#00000066]' />
                     </div>
