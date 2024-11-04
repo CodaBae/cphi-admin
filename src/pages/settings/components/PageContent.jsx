@@ -148,7 +148,7 @@ const PageContent = () => {
                         </div>
 
                         <div className='flex flex-col gap-1'>
-                            <label className='font-sans text-[#1C1A3C] font-medium text-sm'>Image</label>
+                            <label className='font-sans text-[#1C1A3C] font-medium text-sm'>Image (Max. Size 10MB)</label>
                             <div className='lg:w-[502px] h-auto rounded-lg flex p-3 items-center justify-between bg-[#FAFAFA]'>
                                 <input 
                                     type='text'

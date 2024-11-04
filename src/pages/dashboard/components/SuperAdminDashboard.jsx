@@ -369,7 +369,7 @@ const SuperAdminDashboard = () => {
             </div>
             <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
-                    <p className='font-sans text-sm text-[#817F9B]'>Total Refferal</p>
+                    <p className='font-sans text-sm text-[#817F9B]'>Total Individuals</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
                         <img src={Activity} alt='Activity' className='w-5 h-5' />
                     </div>

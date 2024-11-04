@@ -291,7 +291,7 @@ const Appointments = () => {
                                 <p className='text-sm text-[#333843] font-medium  font-inter'>Name</p>
                             </th>
                             <th className='w-[268px] h-[18px] text-left text-sm text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-medium font-inter'>Phone</p>
+                                <p className='text-sm text-[#333843] font-medium font-inter'>Email/Phone</p>
                             </th>
                             <th className='w-[268px] h-[18px] text-left text-sm text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-medium font-inter'>Story</p>

@@ -84,16 +84,22 @@ const Details = () => {
                     <p className='text-[#817F9B] text-base font-sans'>{userData?.location}</p>
                 </div>
             </div>
-            <div className='flex flex-col w-[300px] gap-2'>
-                <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Service</p>
-                <div className='flex items-center gap-2'>
-                    {
-                        userData.about?.services?.map((s, index) => (
-                            <p key={index} className='text-[#817F9B] text-base whitespace-nowrap font-sans'>
-                                {s}
-                            </p>
-                        ))
-                    }
+            <div className='flex items-center gap-5'>
+                <div className='flex flex-col w-[300px] gap-2'>
+                    <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Service</p>
+                    <div className='flex items-center gap-2'>
+                        {
+                            userData.about?.services?.map((s, index) => (
+                                <p key={index} className='text-[#817F9B] text-base whitespace-nowrap font-sans'>
+                                    {s}
+                                </p>
+                            ))
+                        }
+                    </div>
+                </div>
+                <div className='flex flex-col w-[300px] gap-2'>
+                    <p className='font-sans text-[#1C1A3C] text-sm font-medium'>Local Government</p>
+                    <p className='text-[#817F9B] text-base font-sans'>{userData?.lg}</p>
                 </div>
             </div>
             <div className='flex flex-col gap-2'>
