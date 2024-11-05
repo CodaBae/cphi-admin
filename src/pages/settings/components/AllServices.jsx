@@ -57,8 +57,8 @@ const AllServices = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(servicesData?.length / servicesPerPage));
-    }, [servicesPerPage]);
+        setTotalPages(Math.ceil(filteredReward?.length / servicesPerPage));
+    }, [filteredReward, servicesPerPage]);
 
      // Calculate indices for paginated data
      const indexOfLastReward = currentPage * servicesPerPage;
@@ -66,7 +66,7 @@ const AllServices = () => {
      const currentReward = filteredReward?.slice(indexOfFirstReward, indexOfLastReward);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReward?.length / servicesPerPage)) {
+         if (currentPage < Math.ceil(filteredReward?.length / servicesPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -76,6 +76,10 @@ const AllServices = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     useEffect(() => {
+        setCurrentPage(1)
+     }, [search])
 
      const exportExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(servicesData); 

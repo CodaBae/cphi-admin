@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import Activity from "../../assets/svg/activity.svg"
-import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
-import { CiFilter } from 'react-icons/ci'
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io'
 import { TbDownload } from 'react-icons/tb'
 import * as XLSX from "xlsx"
 
@@ -68,8 +67,6 @@ const Appointments = () => {
             );
             
             const querySnapshot = await getDocs(q);
-            
-            // const userData = querySnapshot.docs.map(doc => doc.data());
             const userData = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -154,8 +151,8 @@ const Appointments = () => {
 
     useEffect(() => {
         // Update status pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(allAppointments?.length / appointmentsPerPage));
-    }, [appointmentsPerPage]);
+        setTotalPages(Math.ceil(filteredAppointments?.length / appointmentsPerPage));
+    }, [filteredAppointments, appointmentsPerPage]);
 
      // Calculate indices for paginated data
      const indexOfLastAppointments = currentPage * appointmentsPerPage;
@@ -163,7 +160,7 @@ const Appointments = () => {
      const currentAppointments = filteredAppointments?.slice(indexOfFirstAppointments, indexOfLastAppointments);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentAppointments?.length / appointmentsPerPage)) {
+         if (currentPage < Math.ceil(filteredAppointments?.length / appointmentsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -173,6 +170,11 @@ const Appointments = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     useEffect(() => {
+        setCurrentPage(1);
+    }, [search, locationFilter, statusFilter]);
+    
 
     const exportExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(allAppointments); 

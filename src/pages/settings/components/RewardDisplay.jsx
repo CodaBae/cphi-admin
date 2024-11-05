@@ -75,8 +75,8 @@ const RewardDisplay = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(rewardsData?.length / rewardPerPage));
-    }, [rewardPerPage]);
+        setTotalPages(Math.ceil(filteredReward?.length / rewardPerPage));
+    }, [filteredReward, rewardPerPage]);
 
      // Calculate indices for paginated data
      const indexOfLastReward = currentPage * rewardPerPage;
@@ -84,7 +84,7 @@ const RewardDisplay = () => {
      const currentReward = filteredReward?.slice(indexOfFirstReward, indexOfLastReward);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReward?.length / rewardPerPage)) {
+         if (currentPage < Math.ceil(filteredReward?.length / rewardPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -94,6 +94,10 @@ const RewardDisplay = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     useEffect(() => {
+        setCurrentPage(1)
+     }, [search])
 
      const exportExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(rewardsData); 

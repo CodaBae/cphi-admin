@@ -297,14 +297,14 @@ const SuperAdminDashboard = () => {
 
     useEffect(() => {
         setTotalPages(Math.ceil(leaderBoard?.length / leaderboardPerPage));
-    }, [leaderboardPerPage]);
+    }, [leaderBoard, leaderboardPerPage]);
 
      const indexOfLastLeaderboard = currentPage * leaderboardPerPage;
      const indexOfFirstLeaderboard = indexOfLastLeaderboard - leaderboardPerPage;
      const currentLeaderboard = leaderBoard?.slice(indexOfFirstLeaderboard, indexOfLastLeaderboard);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentLeaderboard?.length / leaderboardPerPage)) {
+         if (currentPage < Math.ceil(leaderBoard?.length / leaderboardPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };

@@ -139,8 +139,8 @@ const AdminAccess = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(allAdmins?.length / adminPerPage));
-    }, [adminPerPage]);
+        setTotalPages(Math.ceil(filteredAdmin?.length / adminPerPage));
+    }, [filteredAdmin, adminPerPage]);
 
      // Calculate indices for paginated data
      const indexOfFirstAdmin = currentPage * adminPerPage;
@@ -148,7 +148,7 @@ const AdminAccess = () => {
      const currentAdmin = filteredAdmin?.slice(indexOfLastAdmin, indexOfFirstAdmin);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(allAdmins?.length / adminPerPage)) {
+         if (currentPage < Math.ceil(filteredAdmin?.length / adminPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -158,6 +158,10 @@ const AdminAccess = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     useEffect(() => {
+        setCurrentPage(1)
+     }, [search, adminFilter])
 
      const exportExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(allAdmins); 

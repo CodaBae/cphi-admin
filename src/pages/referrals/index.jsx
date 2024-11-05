@@ -94,8 +94,8 @@ const Referrals = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(allIndividuals?.length / referralsPerPage));
-    }, [referralsPerPage]);
+        setTotalPages(Math.ceil(filteredReferrals?.length / referralsPerPage));
+    }, [filteredReferrals, referralsPerPage]);
 
      // Calculate indices for paginated data
      const indexOfLastProduct = currentPage * referralsPerPage;
@@ -103,7 +103,7 @@ const Referrals = () => {
      const currentReferrals = filteredReferrals?.slice(indexOfFirstProduct, indexOfLastProduct);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReferrals?.length / referralsPerPage)) {
+         if (currentPage < Math.ceil(filteredReferrals?.length / referralsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -113,6 +113,10 @@ const Referrals = () => {
              setCurrentPage(currentPage - 1);
          }
     };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
 
     
     const exportExcel = () => {

@@ -23,6 +23,9 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
                 return value ? value.trim().split(/\s+/).length <= 20 : true;
             })
             .required("Description Text is required"),
+        color: Yup.string()
+            .matches(/^#([A-Fa-f0-9]{6})$/, "Color must be a valid hex code")
+            .required("Color is required"),
     });
 
     const submitForm = async (values, action) => {
@@ -34,6 +37,7 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
             await updateDoc(servicesRef, {
                 title: values?.title || editData?.title,
                 description: values?.description || editData?.description,
+                color: values?.description || editData?.color,
             });
             setEditDataLoading(false)
             toast.success('Services updated successfully!');
@@ -60,6 +64,7 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
                     initialValues={{
                         title: editData?.title || "",
                         description: editData?.description || "",
+                        color: editData?.color || "",
                     }}
                         validationSchema={formValidationSchema}
                         enableReintialize={true}
@@ -116,7 +121,23 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
                                     </div>
                                     ) : null}
                                 </div>
-                                                        
+
+                                <div className='flex flex-col gap-1 w-full'>
+                                    <label className='font-sans text-[#1C1A3C] font-medium text-sm'>Choose Color</label>
+                                    <input
+                                        type="color"
+                                        name="color"
+                                        value={values.color}
+                                        
+                                        onChange={(e) => setFieldValue("color", e.target.value)}
+                                        className="h-[40px] cursor-pointer"
+                                        // pattern="^#([A-Fa-f0-9]{6})$" // Ensures the input is a valid hex code
+                                        // title="Please enter a valid hex color code (e.g., #000000)"
+                                    />
+                                    {errors.color && touched.color && (
+                                        <div className="text-red-500 text-xs">{errors.color}</div>
+                                    )}
+                                </div>     
 
                                 <button
                                     className={`${isValid ? "bg-[#2D84FF]" : "bg-[#BABABA]"} w-full font-poppins flex items-center rounded-[6px] justify-center mt-[32px] h-[46px] text-base text-center`}

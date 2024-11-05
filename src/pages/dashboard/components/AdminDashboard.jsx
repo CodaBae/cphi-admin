@@ -35,43 +35,12 @@ const AdminDashboard = () => {
 
 
     const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
+        navigator.clipboard.writeText(`Get free medical care using my referral code: ${text}`);
         alert('Copied to clipboard');
     };
 
     const navigate = useNavigate()
 
-    //  const emailOrPhone = localStorage.getItem("emailOrPhone")
-
-    //  const getDetails = async () => {
-    //     setLoading(true)
-    //     try {
-    //         const q = query(
-    //             collection(db, 'users'),
-    //             where('emailOrPhone', '==', emailOrPhone)
-    //         );
-            
-    //         const querySnapshot = await getDocs(q);
-            
-    //         if (!querySnapshot.empty) {
-    //             const userData = querySnapshot.docs[0].data(); 
-    //             console.log(userData, "User data");
-    //             setUserDetails(userData)
-    //         } else {
-    //             console.log("No user found with this email or phone.");
-    //         }
-    //     } catch (err) {
-    //         console.log(err, "Error fetching user details");
-    //     } finally {
-    //         setLoading(false)
-    //     }
-    // };
-    
-    // useEffect(() => {
-    //     if (emailOrPhone) {
-    //         getDetails();
-    //     }
-    // }, [emailOrPhone]);
 
     const referrerUrl = `https://cphi-social.vercel.app/ref/${user?.referrerCode || ''}`; 
 
@@ -125,7 +94,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         setTotalPages(Math.ceil(filteredReferrals?.length / referralsPerPage));
-    }, [referralsPerPage]);
+    }, [filteredReferrals, referralsPerPage]);
 
 
      const indexOfLastReferral = currentPage * referralsPerPage;
@@ -133,7 +102,7 @@ const AdminDashboard = () => {
      const currentReferrals = filteredReferrals?.slice(indexOfFirstReferral, indexOfLastReferral);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentReferrals?.length / referralsPerPage)) {
+         if (currentPage < Math.ceil(filteredReferrals?.length / referralsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -143,6 +112,10 @@ const AdminDashboard = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     useEffect(() => {
+        setCurrentPage(1);
+    }, [search, statusFilter]);
 
      const exportExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(referrals); 

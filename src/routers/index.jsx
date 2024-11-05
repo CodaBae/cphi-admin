@@ -29,17 +29,16 @@ const Routers = () => {
         </Route>
    
         <Route element={<DashboardLayout />}>
-            <Route path='/dashboard' element={<ProtectRoute><Dashboard /></ProtectRoute>} />
-            <Route path='/appointments' element={<ProtectRoute><Appointments /></ProtectRoute>} />
-            <Route path='/individuals' element={<ProtectRoute><Referrals /></ProtectRoute>} />
-            <Route path='/referrals/details' element={<ProtectRoute><ReferralDetails /></ProtectRoute>} />
-            <Route path='/settings' element={<ProtectRoute><Settings /></ProtectRoute>} />
-            <Route path='/orgs/add' element={<ProtectRoute><AddOrgs /></ProtectRoute>} />
-            <Route path='/individuals/add' element={<ProtectRoute><AddIndividual /></ProtectRoute>} />
-            <Route path='/orgs' element={<ProtectRoute><Orgs /></ProtectRoute>} />
-            <Route path='/reward-request' element={<ProtectRoute><RewardRequest /></ProtectRoute>} />
-            <Route path='/client/details' element={<ProtectRoute><Details /></ProtectRoute>} />
-        
+          <Route path='/dashboard' element={<ProtectRoute><Dashboard /></ProtectRoute>} />
+          <Route path='/appointments' element={<ProtectRoute><Appointments /></ProtectRoute>} />
+          <Route path='/individuals' element={<ProtectRoute><Referrals /></ProtectRoute>} />
+          <Route path='/referrals/details' element={<ProtectRoute><ReferralDetails /></ProtectRoute>} />
+          <Route path='/settings' element={<ProtectRoute><Settings /></ProtectRoute>} />
+          <Route path='/orgs/add' element={<ProtectRoute><AddOrgs /></ProtectRoute>} />
+          <Route path='/individuals/add' element={<ProtectRoute><AddIndividual /></ProtectRoute>} />
+          <Route path='/orgs' element={<ProtectRoute><Orgs /></ProtectRoute>} />
+          <Route path='/reward-request' element={<ProtectRoute><RewardRequest /></ProtectRoute>} />
+          <Route path='/client/details' element={<ProtectRoute><Details /></ProtectRoute>} />
         </Route>
     
     </Routes>

@@ -122,8 +122,8 @@ const RewardRequest = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(allRequests?.length / rewardRequestPerPage));
-    }, [rewardRequestPerPage]);
+        setTotalPages(Math.ceil(filteredRewardRequest?.length / rewardRequestPerPage));
+    }, [filteredRewardRequest, rewardRequestPerPage]);
 
      // Calculate indices for paginated data
      const indexOfLastRewardRequest = currentPage * rewardRequestPerPage;
@@ -131,7 +131,7 @@ const RewardRequest = () => {
      const currentRewardRequests = filteredRewardRequest?.slice(indexOfFirstRewardRequest, indexOfLastRewardRequest);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentRewardRequests?.length / rewardRequestPerPage)) {
+         if (currentPage < Math.ceil(filteredRewardRequest?.length / rewardRequestPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -141,6 +141,10 @@ const RewardRequest = () => {
              setCurrentPage(currentPage - 1);
          }
      };
+
+     useEffect(() => {
+        setCurrentPage(1)
+     }, [search])
 
 
      const exportExcel = () => {

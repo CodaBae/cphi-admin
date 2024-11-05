@@ -95,8 +95,8 @@ const Orgs = () => {
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(allOrgs?.length / orgsPerPage));
-    }, [orgsPerPage]);
+        setTotalPages(Math.ceil(filteredOrgs?.length / orgsPerPage));
+    }, [filteredOrgs, orgsPerPage]);
 
      // Calculate indices for paginated data
      const indexOfLastOrgs = currentPage * orgsPerPage;
@@ -104,7 +104,7 @@ const Orgs = () => {
      const currentOrgs = filteredOrgs?.slice(indexOfFirstOrgs, indexOfLastOrgs);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(currentOrgs?.length / orgsPerPage)) {
+         if (currentPage < Math.ceil(filteredOrgs?.length / orgsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -115,7 +115,9 @@ const Orgs = () => {
          }
      };
 
-     
+     useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
 
      const exportExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(allOrgs); 
