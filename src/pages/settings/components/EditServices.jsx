@@ -29,8 +29,6 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
     });
 
     const submitForm = async (values, action) => {
-        // console.log(editData, editData.id, values, "combo")
-        // return
         setEditDataLoading(true)
         try {
             

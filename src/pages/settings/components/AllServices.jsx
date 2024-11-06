@@ -188,7 +188,7 @@ const AllServices = () => {
                                 <td colSpan="8" className="relative">
                                     <div className='absolute inset-0 flex items-center justify-center'>
                                         <div className='flex flex-col gap-2 items-center'>
-                                            <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Reward Available</p>
+                                            <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Services Available</p>
                                         </div>
                                     </div>
                                 </td>
