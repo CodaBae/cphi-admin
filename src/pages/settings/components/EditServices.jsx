@@ -37,7 +37,7 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
             await updateDoc(servicesRef, {
                 title: values?.title || editData?.title,
                 description: values?.description || editData?.description,
-                color: values?.description || editData?.color,
+                color: values?.color || editData?.color,
             });
             setEditDataLoading(false)
             toast.success('Services updated successfully!');
@@ -52,7 +52,7 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
     };
 
   return (
-    <div className='w-[668px] h-[449px] rounded-lg bg-[#fff] flex flex-col p-6 mt-[100px] overflow-y-scroll gap-[32px] '>
+    <div className='w-[668px] h-[549px] rounded-lg bg-[#fff] flex flex-col p-6 mt-[50px]  gap-[32px] '>
         <div className='flex items-center justify-between'>
             <p className='font-semibold text-[#1C1C1E] font-sans text-[18px]'>Edit Services</p>
             <AiOutlineClose className='text-[#817F9B] cursor-pointer text-[24px]' onClick={handleClose} />
