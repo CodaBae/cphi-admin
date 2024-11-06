@@ -9,6 +9,8 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../../firebase-config'
 import * as XLSX from "xlsx"
 import { CgSpinner } from 'react-icons/cg'
+import DeleteReward from './DeleteReward'
+import EditReward from './EditReward'
 
 const RewardDisplay = () => {
     const [search, setSearch] = useState("")
@@ -19,6 +21,11 @@ const RewardDisplay = () => {
     const [rewardsData, setRewardsData] = useState([])
     const [loading, setLoading] = useState(false)
     const [addLoading, setAddLoading] = useState(false)
+    const [editData, setEditData] = useState([])
+    const [openEditReward, setOpenEditReward] = useState(false)
+    const [openDeleteReward, setOpenDeleteReward] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [editLoading, setEditLoading] = useState(false)
 
     // const data = [
     //     {
@@ -67,7 +74,7 @@ const RewardDisplay = () => {
 
     useEffect(() => {
         getRewards()
-    }, [addLoading])
+    }, [addLoading, deleteLoading, editLoading])
 
     console.log(rewardsData, "rewardsData")
 
@@ -154,6 +161,9 @@ const RewardDisplay = () => {
                         <th className='w-[697px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                             <p className='text-sm text-[#333843] font-sans'>Description</p>
                         </th>
+                        <th className='w-[697px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
+                            <p className='text-sm text-[#333843] font-sans'>Action</p>
+                        </th>
                     </tr>
                 </thead>
                 <tbody className=''>
@@ -178,6 +188,16 @@ const RewardDisplay = () => {
                                 </td>
                                 <td className='w-[697px] h-[56px] text-left font-sans  p-4 font-medium '>
                                     <p className='font-sans text-[#667085] font-normal text-sm '>{item?.description}</p>
+                                </td>
+                                <td className='w-[397px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
+                                    <div className="flex items-center gap-2">
+                                        <div className='bg-[#1EC677] p-2 flex items-center justify-center w-[100px] cursor-pointer rounded-xl' onClick={() => {setOpenEditReward(true), setEditData(item)}}>
+                                            <p className='text-[#FFFFFF] font-sans whitespace-nowrap'>{'Edit'}</p>
+                                        </div>
+                                        <div className='bg-[#F4003D] flex items-center justify-center w-[100px] p-2 rounded-xl cursor-pointer' onClick={() => {setOpenDeleteReward(true), setEditData(item)}}>
+                                            <p className='text-[#FFF] font-sans whitespace-nowrap'>{'Delete'}</p>
+                                        </div>
+                                    </div>
                                 </td>
         
                             </tr>
@@ -222,6 +242,24 @@ const RewardDisplay = () => {
                 handleClose={() => setOpenAddReward(false)}
                 loading={addLoading}
                 setLoading={setAddLoading} 
+            />
+        </ModalPop>
+
+        <ModalPop isOpen={openEditReward}>
+            <EditReward 
+                handleClose={() => setOpenEditReward(false)}
+                editData={editData}
+                editDataLoading={editLoading}
+                setEditDataLoading={setEditLoading} 
+            />
+        </ModalPop>
+
+        <ModalPop isOpen={openDeleteReward}>
+            <DeleteReward 
+                handleClose={() => setOpenDeleteReward(false)}
+                deleteData={editData}
+                deleteLoading={deleteLoading}
+                setDeleteLoading={setDeleteLoading} 
             />
         </ModalPop>
 
