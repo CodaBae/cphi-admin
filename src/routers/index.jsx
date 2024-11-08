@@ -17,6 +17,8 @@ import AddOrgs from '../pages/orgs/components/AddOrgs'
 import AddIndividual from '../pages/referrals/components/AddIndividual'
 import Settings from '../pages/settings'
 import ProtectRoute from './ProtectRoute'
+import Kols from '../pages/kol'
+import AddKols from '../pages/kol/components/AddKols'
 
 
 const Routers = () => {
@@ -35,8 +37,10 @@ const Routers = () => {
           <Route path='/referrals/details' element={<ProtectRoute><ReferralDetails /></ProtectRoute>} />
           <Route path='/settings' element={<ProtectRoute><Settings /></ProtectRoute>} />
           <Route path='/orgs/add' element={<ProtectRoute><AddOrgs /></ProtectRoute>} />
+          <Route path='/kols/add' element={<ProtectRoute><AddKols /></ProtectRoute>} />
           <Route path='/individuals/add' element={<ProtectRoute><AddIndividual /></ProtectRoute>} />
           <Route path='/orgs' element={<ProtectRoute><Orgs /></ProtectRoute>} />
+          <Route path='/kols' element={<ProtectRoute><Kols /></ProtectRoute>} />
           <Route path='/reward-request' element={<ProtectRoute><RewardRequest /></ProtectRoute>} />
           <Route path='/client/details' element={<ProtectRoute><Details /></ProtectRoute>} />
         </Route>

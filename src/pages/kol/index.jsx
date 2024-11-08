@@ -1,63 +1,56 @@
 import React, { useEffect, useState } from 'react'
 import { CiFilter } from 'react-icons/ci'
-import { FaPlus } from 'react-icons/fa6'
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
 import { TbDownload } from 'react-icons/tb'
-import { useNavigate } from 'react-router-dom'
-import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
+import { FaPlus } from "react-icons/fa6";
+import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import * as XLSX from "xlsx"
 
 import Activity from "../../assets/svg/activity.svg"
 
-import { db } from '../../firebase-config'
-import { CgSpinner } from 'react-icons/cg'
-import { toast } from 'react-toastify'
-import { useSelector } from 'react-redux'
+import { db } from '../../firebase-config';
+import { CgSpinner } from 'react-icons/cg';
+import { useSelector } from 'react-redux';
 
-
-const RewardRequest = () => {
+const Kols = () => {
     const [search, setSearch] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
-    const [rewardRequestPerPage] = useState(8)
+    const [orgsPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
-    const [allRequests, setAllRequests] = useState([])
-    const [updateLoading, setUpdateLoading] = useState(false)
+    const [allKols, setAllOrgs] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
-    const [statusFilter, setStatusFilter] = useState("")
     const [loading, setLoading] = useState(false)
 
-    
+
     const navigate = useNavigate()
 
     const { user } = useSelector((state) => state.adminLogin)
     const adminLoginType = user?.userType
     const adminName = user?.fullName
 
-    const getAllRequests = async () => {
+
+    
+    const getAllOrgs = async () => {
+        const kolsRef = collection(db, "users");
         setLoading(true)
         try {
-            const requestsRef = collection(db, "requests")
-            const q = query(requestsRef, where('userDetails.addedBy', '==', adminName));
-            const querySnapshot = adminLoginType === "Program Assistant" ? await getDocs(q)  : await getDocs(requestsRef);
-
-            const data = querySnapshot.docs.map(doc => ({
+            const q = adminLoginType === "Program Assistant" ? query(kolsRef, where("type", "==", "KOL"), where('addedBy', '==', adminName)) :  query(kolsRef, where("type", "==", "KOL"));
+            const querySnapshot = await getDocs(q);
+    
+            const kols = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
-
-            setAllRequests(data)
+    
+            console.log("All kols:", kols);
+            setAllOrgs(kols);
         } catch (err) {
-            console.log("Error getting data:",  err)
+            console.log(err, "Error fetching kols ");
         } finally {
             setLoading(false)
         }
-    }
-
-    console.log(allRequests, "allRequests")
-
-    useEffect(() => {
-        getAllRequests()
-    }, [updateLoading])
+    };
 
     const getTotal = async (referrerCode) => {
         try {
@@ -77,61 +70,41 @@ const RewardRequest = () => {
         const totals = {};
         
         // Fetch referral totals for each leaderboard user
-        for (const item of allRequests) {
-            const total = await getTotal(item?.userDetails?.referrerCode);
-            totals[item.userDetails.referrerCode] = total;
+        for (const item of allKols) {
+            const total = await getTotal(item.referrerCode);
+            totals[item.referrerCode] = total;
         }
         
         // Update the referral totals state
         setReferralTotals(totals);    
     };
 
+    useState(() => {
+        getAllOrgs()
+    }, [])
+    
     useEffect(() => {
         fetchTotals()
-    }, [allRequests]);
+    }, [allKols]);
 
-    const updateStatus = async (item) => {
-        setUpdateLoading(true)
-        try {
-            
-            const rewardsRef = doc(db, 'requests', item.id);
 
-            await updateDoc(rewardsRef, {
-                status: 'Completed',
-            });
-            setUpdateLoading(false)
-            toast.success('Status updated successfully!');
-        } catch (error) {
-            setUpdateLoading(false)
-            toast.error('Error updating status!');
-            console.error('Error updating status:', error);
-        }
-    };
-
-    const filteredRewardRequest = allRequests?.filter((item) => {
-        const matchesSearch =
-        item.userDetails.fullName.toLowerCase().includes(search.toLowerCase()) || 
-        item.userDetails.emailOrPhone.toLowerCase().includes(search.toLowerCase()) || ""
-      
-        const matchesStatus = 
-            statusFilter === "" || 
-            item.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
-    });
+    const filteredKols = allKols?.filter((item) => (
+        item.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        item.emailOrPhone.toLowerCase().includes(search.toLowerCase()) || ""
+    ))
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
-        setTotalPages(Math.ceil(filteredRewardRequest?.length / rewardRequestPerPage));
-    }, [filteredRewardRequest, rewardRequestPerPage]);
+        setTotalPages(Math.ceil(filteredKols?.length / orgsPerPage));
+    }, [filteredKols, orgsPerPage]);
 
      // Calculate indices for paginated data
-     const indexOfLastRewardRequest = currentPage * rewardRequestPerPage;
-     const indexOfFirstRewardRequest = indexOfLastRewardRequest - rewardRequestPerPage;
-     const currentRewardRequests = filteredRewardRequest?.slice(indexOfFirstRewardRequest, indexOfLastRewardRequest);
+     const indexOfLastKols = currentPage * orgsPerPage;
+     const indexOfFirstKols = indexOfLastKols - orgsPerPage;
+     const currentKols = filteredKols?.slice(indexOfFirstKols, indexOfLastKols);
  
      const handleNextPage = () => {
-         if (currentPage < Math.ceil(filteredRewardRequest?.length / rewardRequestPerPage)) {
+         if (currentPage < Math.ceil(filteredKols?.length / orgsPerPage)) {
              setCurrentPage(currentPage + 1);
          }
      };
@@ -143,33 +116,33 @@ const RewardRequest = () => {
      };
 
      useEffect(() => {
-        setCurrentPage(1)
-     }, [search])
-
+        setCurrentPage(1);
+    }, [search]);
 
      const exportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(allRequests); 
+        const worksheet = XLSX.utils.json_to_sheet(allKols); 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'allRequests');
-        XLSX.writeFile(workbook, `requests_${Date.now()}.xlsx`);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'allKols');
+        XLSX.writeFile(workbook, `allKols_${Date.now()}.xlsx`);
     };
 
+    
   return (
     <div className='w-full mt-[30px]'>
         <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
             <div className='flex items-center justify-between'>
-                <p className='font-sans text-sm text-[#817F9B]'>Total Requests</p>
+                <p className='font-sans text-sm text-[#817F9B]'>Total KOL</p>
                 <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
                     <img src={Activity} alt='Activity' className='w-5 h-5' />
                 </div>
             </div>
             <div className='flex flex-col mt-3 gap-5'>
-                <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allRequests?.length}</p>
+                <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allKols?.length}</p>
             </div>
         </div>
         <div className='w-full mt-10'>
             <div className='flex items-center flex-col lg:flex-row justify-between px-5'>
-                <p className='font-sans text-[18px] font-medium text-[#1C1C1E]'>Reward Requests</p>
+                <p className='font-sans text-[18px] font-medium text-[#1C1C1E]'>Kol</p>
                 <div className='flex items-center flex-col lg:flex-row gap-3'>
                     <input 
                         className='w-[290px] h-[40px] outline-[#2D84FF] rounded-lg p-2 border border-[#E1E5F3]'
@@ -178,30 +151,17 @@ const RewardRequest = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                     <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full sm:w-[120px] h-[40px] border border-[#EBEDF0] cursor-pointer outline-[#2D84FF] rounded-lg p-2"  //"w-[120px] h-[40px] border border-[#EBEDF0] outline-[#2D84FF] rounded-lg p-2"
-                    >
-                        <option value="">Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                    {/* <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
-                        <CiFilter className='text-base text-[#6B788E]' />
-                        <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
-                    </div> */}
                     <div 
-                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] cursor-pointer gap-1 rounded-lg flex items-center p-3'
+                        className='w-full lg:w-[87px] h-[40px] border border-[#EBEDF0] gap-1 cursor-pointer rounded-lg flex items-center p-3'
                         onClick={exportExcel}
                     >
                         <TbDownload className='text-base text-[#6B788E]' />
                         <p className='text-xs font-semibold font-sans text-[#7A8699]'>Export</p>
                     </div>
-                    {/* <div className='w-[142px] h-[45px] cursor-pointer bg-[#2D84FF] gap-2 rounded-lg flex gap-1 justify-center items-center p-3'>
+                    <div onClick={() =>  navigate('/kols/add')} className='w-full lg:w-[173px] h-[45px] cursor-pointer bg-[#2D84FF] gap-2 rounded-lg flex gap-1 justify-center items-center p-3'>
                         <FaPlus className="w-4 h-4 text-[#fff]" />
-                        <p className='text-xs font-semibold text-center font-sans text-[#fff]'>Add Referrer</p>
-                    </div> */}
+                        <p className='text-xs font-semibold text-center font-sans text-[#fff]'>Add Kol</p>
+                    </div>
                 </div>
             </div>
 
@@ -225,15 +185,10 @@ const RewardRequest = () => {
                             <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Email/Phone</p>
                             </th>
-                            <th className='w-[268px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans'>Status</p>
-                            </th>
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                                <p className='text-sm text-[#333843] font-sans whitespace-nowrap'>Total Referrals</p>
+                                <p className='text-sm text-[#333843] font-sans'>Total Referrals</p>
                             </th>
-                             <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
-                                Action
-                            </th>
+                           
                         </tr>
                     </thead>
                     <tbody className=''>
@@ -245,50 +200,45 @@ const RewardRequest = () => {
                                     </div>
                                 </td>
                             </tr>
-                           :  
-                            currentRewardRequests?.length > 0 ?
-                            currentRewardRequests.map((item, index) => (
+                            :
+                            currentKols?.length > 0 ?
+                            currentKols?.map((item, index) => (
                                 <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
                                     
-                                    <td className='w-[143px] h-[56px] text-left font-sans p-4 font-medium '>
+                                    <td className='w-[143px] h-[56px] text-left font-sans  p-4 font-medium '>
                                         <p className='font-sans text-[#333843] font-semibold text-sm'>{`#${index + 1}`}</p>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-medium text-sm'>
-                                            {new Date(item?.userDetails?.createdAt?.seconds * 1000).toLocaleDateString()}
-                                        </p>
+                                        <div className='flex flex-col gap-1'>
+                                            <p className='font-sans text-[#333843] font-medium text-sm'>
+                                                {new Date(item?.createdAt?.seconds * 1000).toLocaleDateString()}
+                                            </p>
+                                            <p className='font-sans text-[#333843] font-medium text-sm'>
+                                                {new Date(item?.createdAt?.seconds * 1000).toLocaleTimeString()}
+                                            </p>
+                                        </div>
                                     </td>
                                     <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.userDetails?.fullName}</p>
+                                        <p className='font-sans text-[#333843] font-medium text-sm '>{item?.fullName}</p>
                                     </td>
                                     <td className='w-[198px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.userDetails?.emailOrPhone}</p>
-                                    </td>
-                                    <td className='w-[167px] h-[56px] text-left font-euclid text-[#333843] p-4 font-medium '>
-                                        <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]"  : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
-                                            <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
-                                        </div>
-                                    </td>
-                                
-                                    <td className='w-[168px] h-[56px] text-left cursor-pointer font-sans p-4 font-medium ' onClick={() => navigate("/referrals/details", { state: item?.userDetails})}>
-                                        <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
-                                            {referralTotals[item.userDetails.referrerCode] || 0}
-                                        </p>
+                                        <p className='font-sans text-[#667085] font-normal text-sm '>{item?.emailOrPhone}</p>
+                                        
                                     </td>
                                     
-                                    <td className='w-[148px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                        <div className='bg-[#1EC6771A] p-2 flex items-center justify-center cursor-pointer rounded-lg' onClick={() => {item?.status === "Pending" ? updateStatus(item) : {}}}>
-                                            <p className='text-[#1EC677] text-center font-sans whitespace-nowrap'>{updateLoading ? <CgSpinner className=" animate-spin text-lg " /> : 'Completed'}</p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <td className='w-[168px] h-[56px] text-left cursor-pointer font-sans p-4 font-medium ' onClick={() => navigate("/referrals/details", {state: item})}>
+                                        <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
+                                            {referralTotals[item.referrerCode] || 0}
+                                        </p>
+                                    </td>                              
             
-                            ))  : (
+                                </tr>
+                            )) : (
                                 <tr className='h-[300px] bg-white border-t border-grey-100'>
                                     <td colSpan="8" className="relative">
                                         <div className='absolute inset-0 flex items-center justify-center'>
                                             <div className='flex flex-col gap-2 items-center'>
-                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Reward Requests</p>
+                                                <p className='text-[#0C1322] font-medium text-[20px] font-inter'>No Kol Available</p>
                                             </div>
                                         </div>
                                     </td>
@@ -323,4 +273,4 @@ const RewardRequest = () => {
   )
 }
 
-export default RewardRequest
+export default Kols

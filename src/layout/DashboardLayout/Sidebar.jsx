@@ -7,6 +7,7 @@ import { TbLogout } from 'react-icons/tb'
 import { FaRegFileAlt } from 'react-icons/fa'
 import { FaUsers } from 'react-icons/fa6'
 import { MdOutlineCardGiftcard } from 'react-icons/md'
+import { HiOutlineUsers } from "react-icons/hi2";
 import { CiSettings } from 'react-icons/ci'
 import { PiUsersThree } from "react-icons/pi";
 import { BiUser } from 'react-icons/bi'
@@ -67,6 +68,16 @@ const Sidebar = ({ closeSidebar }) => {
       >
         <PiUsersThree className={`${location.pathname === "/orgs" || location.pathname === "/orgs/add"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
         <p className={`${location.pathname === "/orgs" || location.pathname === "/orgs/add"  ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Orgs</p>
+      </div>
+      <div 
+        className={`${location.pathname === "/kols" || location.pathname === "/kols/add"  ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} 
+        onClick={() => {
+          navigate('/kols');
+          closeSidebar();
+        }}
+      >
+        <HiOutlineUsers className={`${location.pathname === "/kols" || location.pathname === "/kols/add"  ? "text-[#fff]" : "text-[#575757]"} w-5 h-5  group-hover:text-[#fff]`}/>
+        <p className={`${location.pathname === "/kols" || location.pathname === "/kols/add"  ? "text-[#fff]" : "text-[#575757]"} font-sans  group-hover:text-[#fff] font-medium text-sm`}>Kols</p>
       </div>
       <div 
         className={`${location.pathname === "/individuals" || location.pathname === "/individuals/add" ? "bg-[#2D84FF]" : ""} flex items-center gap-3 group hover:bg-[#2D84FF] p-2 w-[156px] cursor-pointer rounded-lg h-auto`} 

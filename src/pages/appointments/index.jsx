@@ -30,6 +30,7 @@ const Appointments = () => {
     const [updateLoading, setUpdateLoading] = useState(false)
     const [updateLoadingB, setUpdateLoadingB] = useState(false)
     const [loading, setLoading] = useState(true)
+    // const [sortedAppointments, setSortedAppointments] = useState([])
 
     const navigate = useNavigate()
 
@@ -85,9 +86,9 @@ const Appointments = () => {
         const referralsRef = collection(db, "referrals");
     
         try {
-            const p = adminLoginType === "Admin" ? query(referralsRef, where("status", "==", "Pending"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "Pending")) ;
-            const n = adminLoginType === "Admin" ? query(referralsRef, where("status", "==", "No Show"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "No Show"));
-            const c = adminLoginType === "Admin" ? query(referralsRef, where("status", "==", "Completed"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "Completed")) ;
+            const p = adminLoginType === "Program Assistant" ? query(referralsRef, where("status", "==", "Pending"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "Pending")) ;
+            const n = adminLoginType === "Program Assistant" ? query(referralsRef, where("status", "==", "No Show"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "No Show"));
+            const c = adminLoginType === "Program Assistant" ? query(referralsRef, where("status", "==", "Completed"), where('referrerCode', '==', adminLoginReferrerCode)) : query(referralsRef, where("status", "==", "Completed")) ;
             const pendingQuerySnapshot = await getDocs(p);
             const noShowQuerySnapshot = await getDocs(n);
             const completedQuerySnapshot = await getDocs(c);
@@ -119,7 +120,7 @@ const Appointments = () => {
     };
 
     useEffect(() => {
-        if(adminLoginType === "Admin") {
+        if(adminLoginType === "Program Assistant") {
             getReferrals()
         } else {
             getAllAppointments()
@@ -129,9 +130,46 @@ const Appointments = () => {
 
     console.log(allAppointments, "allAppointments")
 
+    function sortAppointmentsByDate(appointments) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+    
+        return appointments.sort((a, b) => {
+            const dateA = parseDate(a.date);
+            const dateB = parseDate(b.date);
+    
+            
+            if (isSameDay(dateA, today) && !isSameDay(dateB, today)) return -1;
+            if (!isSameDay(dateA, today) && isSameDay(dateB, today)) return 1;
+    
+            // Sort by date (ascending)
+            return dateA - dateB;
+        });
+    }
+    
+    // Helper function to parse the date string (expected format: "dd/mm/yyyy")
+    function parseDate(dateString) {
+        const [day, month, year] = dateString.split("/").map(Number);
+        return new Date(year, month - 1, day);
+    }
+    
+    // Helper function to check if two dates fall on the same day
+    function isSameDay(date1, date2) {
+        return (
+            date1.getDate() === date2.getDate() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getFullYear() === date2.getFullYear()
+        );
+    }
+    
+    // Example usage
+    const appointments = allAppointments;
+    const sortedAppointments = sortAppointmentsByDate(appointments);
+    console.log(sortedAppointments, "sortedAppointments");
 
 
-    const filteredAppointments = allAppointments?.filter((item) => {
+
+    const filteredAppointments = sortedAppointments?.filter((item) => {
         const matchesSearch = 
             item.profile.fullName.toLowerCase().includes(search.toLowerCase()) || 
             item.profile.emailOrphone.toLowerCase().includes(search.toLowerCase());

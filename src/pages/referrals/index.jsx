@@ -34,7 +34,7 @@ const Referrals = () => {
         const orgsRef = collection(db, "users");
         setLoading(true)
         try {
-            const q = adminLoginType === "Admin" ? query(orgsRef, where("type", "==", "Individual"), where('addedBy', '==', adminName)) : query(orgsRef, where("type", "==", "Individual"));
+            const q = adminLoginType === "Program Assistant" ? query(orgsRef, where("type", "==", "Individual"), where('addedBy', '==', adminName)) : query(orgsRef, where("type", "==", "Individual"));
             const querySnapshot = await getDocs(q);
     
             const individuals = querySnapshot.docs.map(doc => ({

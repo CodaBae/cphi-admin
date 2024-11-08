@@ -28,7 +28,7 @@ const ReferralDetails = () => {
     
 
     const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
+        navigator.clipboard.writeText(`Get free medical care using my referral code: ${text}`);
         alert('Copied to clipboard');
     };
 
@@ -39,7 +39,7 @@ const ReferralDetails = () => {
 
     console.log(userDetails, "userDetails")
 
-    const referrerUrl = `https://cphi-social.vercel.app/${userDetails.referrerCode || ''}`; 
+    const referrerUrl = `https://cphi-social.vercel.app/ref/${userDetails.referrerCode || ''}`; 
 
     const downloadQRCode = () => {
         const canvas = qrRef.current.querySelector('canvas');

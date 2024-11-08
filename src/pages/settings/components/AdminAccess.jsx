@@ -189,7 +189,7 @@ const AdminAccess = () => {
             >
                 <option value="">Type</option>
                 <option value="Super Admin">Super Admin</option>
-                <option value="Admin">Admin</option>
+                <option value="Admin">Program Assistant</option>
             </select>
             {/* <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
                 <CiFilter className='text-base text-[#6B788E]' />

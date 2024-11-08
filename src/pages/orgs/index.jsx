@@ -35,7 +35,7 @@ const Orgs = () => {
         const orgsRef = collection(db, "users");
         setLoading(true)
         try {
-            const q = adminLoginType === "Admin" ? query(orgsRef, where("type", "==", "Organization"), where('addedBy', '==', adminName)) :  query(orgsRef, where("type", "==", "Organization"));
+            const q = adminLoginType === "Program Assistant" ? query(orgsRef, where("type", "==", "Organization"), where('addedBy', '==', adminName)) :  query(orgsRef, where("type", "==", "Organization"));
             const querySnapshot = await getDocs(q);
     
             const orgs = querySnapshot.docs.map(doc => ({

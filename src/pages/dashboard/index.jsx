@@ -12,7 +12,7 @@ const Dashboard = () => {
 
   return (
     <>
-        {adminLoginType === "Admin" ? <AdminDashboard /> : <SuperAdminDashboard />}
+        {adminLoginType === "Program Assistant" ? <AdminDashboard /> : <SuperAdminDashboard />}
     </>
   )
 }

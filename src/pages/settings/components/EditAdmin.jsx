@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { db } from '../../../firebase-config';
 import { doc, updateDoc } from 'firebase/firestore';
 
-const types = ["Select Type", "Admin", "Super Admin"];
+const types = ["Select Type", "Program Assistant", "Super Admin"];
 
 const EditAdmin = ({ handleClose, adminData, editDataLoading, setEditDataLoading }) => {
     const [selectedType, setSelectedType] = useState(types[0])

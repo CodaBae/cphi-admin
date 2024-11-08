@@ -9,7 +9,7 @@ import { addDoc, collection } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 
 
-const types = ["Select Type", "Admin", "Super Admin"];
+const types = ["Select Type", "Program Assistant", "Super Admin"];
 
 const AddAdmin = ({ handleClose }) => {
     const [loading, setLoading] = useState(false)

@@ -129,15 +129,15 @@ const SuperAdminDashboard = () => {
         getAllUsers()
     }, [])
 
-    let monthlyReferrals = Array(12).fill(0);
+    // let monthlyReferrals = Array(12).fill(0);
 
    
-    allAppointments.forEach(appointment => {
-        const [day, month, year] = appointment.date.split('/').map(Number);
-        if (appointment.referrerCode) {
-            monthlyReferrals[month - 1] += 1;
-        }
-    });
+    // allAppointments.forEach(appointment => {
+    //     const [day, month, year] = appointment.date.split('/').map(Number);
+    //     if (appointment.referrerCode) {
+    //         monthlyReferrals[month - 1] += 1;
+    //     }
+    // });
 
     const [chartOptions, setChartOptions] = useState({
         chart: {
@@ -177,34 +177,36 @@ const SuperAdminDashboard = () => {
         colors: ['#00E396'],
     });
 
-    const [seriesData, setSeriesData] = useState([]);
+    // const [seriesData, setSeriesData] = useState([]);
+    const [seriesData, setSeriesData] = useState([{ name: 'Referrals', data: Array(12).fill(0) }]);
+
 
     useEffect(() => {
-        // Step 1: Initialize monthly referrals
-        let monthlyReferrals = Array(12).fill(0);
+        const monthlyReferrals = Array(12).fill(0);
 
-        // Step 2: Process allAppointments
-        allAppointments.forEach((appointment) => {
-            const [day, month, year] = appointment.date.split('/').map(Number);
-            if (appointment.referrerCode) {
-                monthlyReferrals[month - 1] += 1;
+        allAppointments?.forEach((appointment) => {
+            const dateParts = appointment.date.split('/').map(Number);
+            if (dateParts.length === 3 && appointment.referrerCode) {
+                const month = dateParts[1];
+                if (month >= 1 && month <= 12) {
+                    monthlyReferrals[month - 1] += 1;
+                }
             }
         });
 
-        // Step 3: Update series and y-axis max in chart options
         setSeriesData([{ name: 'Referrals', data: monthlyReferrals }]);
+
         setChartOptions((prevOptions) => ({
             ...prevOptions,
             yaxis: {
                 ...prevOptions.yaxis,
-                max: Math.max(...monthlyReferrals) + 10,
+                max: Math.max(10, ...monthlyReferrals) + 5,
             },
         }));
-    }, [allAppointments]); // Re-run when allAppointments data changes
+    }, [allAppointments]);
 
 
 
-    // Sample function to parse date and extract year
     const getYear = (dateString) => {
         return new Date(dateString.split('/').reverse().join('-')).getFullYear();
     };
@@ -213,6 +215,8 @@ const SuperAdminDashboard = () => {
      const filteredAppointments = allAppointments?.filter(booking => getYear(booking.date) === selectedYear);
 
 
+
+    //Service Graph
       let serviceCount = {};
       filteredAppointments?.forEach(booking => {
           booking.about.services.forEach(service => {
@@ -381,14 +385,14 @@ const SuperAdminDashboard = () => {
         </div>
 
         <div className='flex flex-col lg:flex-row items-center gap-5 mt-5'>
-             <div className='flex flex-col w-full lg:w-6/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
-            <div className='flex items-center justify-between'>
-                <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Referral Growth</p>
+            <div className='flex flex-col w-full lg:w-6/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
+                <div className='flex items-center justify-between'>
+                    <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Referral Growth</p>
+                </div>
+                <div className='mt-4'>
+                    <Chart options={chartOptions} series={seriesData} type='line' height={300} />
+                </div>
             </div>
-            <div className='mt-4'>
-                <Chart options={chartOptions} series={seriesData} type='line' height={300} />
-            </div>
-        </div>
 
         <div className='flex flex-col w-full lg:w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
             <div className='flex items-center justify-between'>
