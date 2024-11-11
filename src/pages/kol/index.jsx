@@ -18,7 +18,7 @@ const Kols = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [orgsPerPage] = useState(8)
     const [totalPages, setTotalPages] = useState(1);
-    const [allKols, setAllOrgs] = useState([])
+    const [allKols, setAllKols] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
     const [loading, setLoading] = useState(false)
 
@@ -31,7 +31,7 @@ const Kols = () => {
 
 
     
-    const getAllOrgs = async () => {
+    const getAllKols = async () => {
         const kolsRef = collection(db, "users");
         setLoading(true)
         try {
@@ -44,7 +44,7 @@ const Kols = () => {
             }));
     
             console.log("All kols:", kols);
-            setAllOrgs(kols);
+            setAllKols(kols);
         } catch (err) {
             console.log(err, "Error fetching kols ");
         } finally {
@@ -80,7 +80,7 @@ const Kols = () => {
     };
 
     useState(() => {
-        getAllOrgs()
+        getAllKols()
     }, [])
     
     useEffect(() => {

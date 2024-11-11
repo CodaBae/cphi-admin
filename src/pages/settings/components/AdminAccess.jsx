@@ -31,43 +31,12 @@ const AdminAccess = () => {
     const [deleteLoading, setDeleteLoading] = useState(false)
     const [adminFilter, setAdminFilter] = useState("")
     const [loading, setLoading] = useState(false)
+    const [kolTotals, setKolTotals] = useState({})
+    const [individualTotals, setIndividualTotals] = useState({})
+    const [orgTotals, setOrgTotals] = useState({})
 
     const navigate = useNavigate()
     
-    const data = [
-        {
-            type: "Admin",
-            totalReferrals: 5,
-            totalOrgs: 5,
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-        },
-        {
-            type: "Admin",
-            totalReferrals: 5,
-            totalOrgs: 5,
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-        },
-        {
-            type: "Admin",
-            totalReferrals: 5,
-            totalOrgs: 5,
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-        },
-        {
-            type: "Super Admin",
-            totalReferrals: 5,
-            totalOrgs: 5,
-            date: "12/8/2024",
-            name: "John Bushmill",
-            email: "Johnb@mail.com",
-        },
-    ]
 
     const getAllAdmins = async () => {
         setLoading(true)
@@ -89,6 +58,102 @@ const AdminAccess = () => {
     }
 
     console.log(allAdmins, "allAdmins")
+
+    const getKols = async (fullName) => {
+        try {
+            const q = query(
+                collection(db, 'users'),
+                where('addedBy', '==', fullName), where('type', '==', 'KOL')
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.size; // Get the number of docs directly
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return 0;
+        }
+    };
+
+    const fetchTotalKols = async () => {
+        const totals = {};
+        
+        // Fetch referral totals for each leaderboard user
+        for (const item of allAdmins) {
+            const total = await getKols(item.fullName);
+            totals[item.fullName] = total;
+        }
+        
+        // Update the referral totals state
+        setKolTotals(totals);    
+    };
+
+    useEffect(() => {
+        fetchTotalKols()
+    }, [loading, editDataLoading, deleteLoading])
+
+    const getIndividuals = async (fullName) => {
+        try {
+            const q = query(
+                collection(db, 'users'),
+                where('addedBy', '==', fullName), where('type', '==', 'Individual')
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.size; // Get the number of docs directly
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return 0;
+        }
+    };
+
+    const fetchTotalIndividuals = async () => {
+        const totals = {};
+        
+        // Fetch referral totals for each leaderboard user
+        for (const item of allAdmins) {
+            const total = await getIndividuals(item.fullName);
+            totals[item.fullName] = total;
+        }
+        
+        // Update the individual totals state
+        setIndividualTotals(totals);    
+    };
+
+    useEffect(() => {
+        fetchTotalIndividuals()
+    }, [loading, editDataLoading, deleteLoading])
+
+    const getOrgs = async (fullName) => {
+        try {
+            const q = query(
+                collection(db, 'users'),
+                where('addedBy', '==', fullName), where('type', '==', 'Organization')
+            );
+            const querySnapshot = await getDocs(q);
+            console.log(querySnapshot.docs, "peace")
+            return querySnapshot.size; // Get the number of docs directly
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            return 0;
+        }
+    };
+
+    const fetchTotalOrgs = async () => {
+        const totals = {};
+        
+        // Fetch referral totals for each leaderboard user
+        for (const item of allAdmins) {
+            const total = await getOrgs(item.fullName);
+            totals[item.fullName] = total;
+        }
+      
+        // Update the individual totals state
+        setOrgTotals(totals);    
+    };
+
+    console.log(orgTotals, "orgs")
+
+    useEffect(() => {
+        fetchTotalOrgs()
+    }, [loading, editDataLoading, deleteLoading])
 
     useEffect(() => {
         getAllAdmins()
@@ -135,7 +200,7 @@ const AdminAccess = () => {
 
     useEffect(() => {
         fetchTotals()
-    }, [])
+    }, [loading, editDataLoading, deleteLoading])
 
     useEffect(() => {
         // Update total pages whenever filteredOrders changes
@@ -191,10 +256,6 @@ const AdminAccess = () => {
                 <option value="Super Admin">Super Admin</option>
                 <option value="Admin">Program Assistant</option>
             </select>
-            {/* <div className='w-[87px] h-[40px] border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'>
-                <CiFilter className='text-base text-[#6B788E]' />
-                <p className='text-xs font-semibold font-sans text-[#7A8699]'>Filter</p>
-            </div> */}
             <div 
                 className='w-full lg:w-[87px] h-[40px] cursor-pointer border border-[#EBEDF0] gap-1 rounded-lg flex items-center p-3'
                 onClick={exportExcel}
@@ -224,11 +285,17 @@ const AdminAccess = () => {
                         <p className='text-sm text-[#333843] font-sans'>Type</p>
                     </th>
                     <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                        <p className='text-sm text-[#333843] font-sans'>Total Referrals</p>
+                        <p className='text-sm text-[#333843] font-sans whitespace-nowrap'>Referrals</p>
                     </th>
-                    {/* <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
-                        <p className='text-sm text-[#333843] font-sans'>Total Orgs</p>
-                    </th> */}
+                    <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
+                        <p className='text-sm text-[#333843] font-sans whitespace-nowrap'>Orgs</p>
+                    </th>
+                    <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
+                        <p className='text-sm text-[#333843] font-sans whitespace-nowrap'>Individuals</p>
+                    </th>
+                    <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
+                        <p className='text-sm text-[#333843] font-sans whitespace-nowrap'>Kols</p>
+                    </th>
                     <th className='w-[298px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                         <p className='text-sm text-[#333843] font-sans'>Name</p>
                     </th>
@@ -266,9 +333,21 @@ const AdminAccess = () => {
                                     {referralTotals[item.referrerCode] || 0}
                                 </p>
                             </td>
-                            {/* <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
-                                <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>{item?.totalOrgs}</p>
-                            </td> */}
+                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                                <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
+                                    {orgTotals[item.fullName] || 0}
+                                </p>
+                            </td>
+                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                                <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
+                                    {individualTotals[item.fullName] || 0}  
+                                </p>
+                            </td>
+                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                                <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
+                                    {kolTotals[item.fullName] || 0}
+                                </p>
+                            </td>
                             <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
                                 <p className='font-sans text-[#333843] font-medium text-sm '>{item?.fullName}</p>
                             </td>
