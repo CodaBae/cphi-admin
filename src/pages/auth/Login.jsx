@@ -14,12 +14,28 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+
     const formValidationSchema = Yup.object().shape({
         emailOrPhone: Yup.string().required("Email or Phone is required"),
         password: Yup.string().required("Password is required"),
     })
 
-    const dispatch = useDispatch()
+    // useEffect(() => {
+    //     // Check localStorage on mount
+    //     const sessionData = JSON.parse(localStorage.getItem("sessionData"));
+    //     if (sessionData) {
+    //         dispatch(loginAdmin(sessionData)).then(res => {
+    //             if (res?.type === "login/loginAdmin/fulfilled") {
+    //                 navigate("/dashboard");
+    //             }
+    //         });
+    //     }
+    // }, [dispatch, navigate]);
+
+
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -27,8 +43,6 @@ const Login = () => {
             document.body.style.overflow = 'auto'; 
         };
     }, []);
-
-    const navigate = useNavigate()
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -49,6 +63,22 @@ const Login = () => {
         })
 
     }
+
+    // const submitForm = async (values) => {
+    //     setLoading(true);
+    //     const { emailOrPhone, password, check } = values;
+
+    //     dispatch(loginAdmin({ emailOrPhone, password })).then((res) => {
+    //         setLoading(false);
+    //         if (res?.type === "login/loginAdmin/fulfilled") {
+    //             if (check) {
+    //                 // Store session data in localStorage if "Stay signed in" is checked
+    //                 localStorage.setItem("sessionData", JSON.stringify({ emailOrPhone, password }));
+    //             }
+    //             navigate("/dashboard");
+    //         }
+    //     });
+    // };
 
     
 
@@ -144,6 +174,7 @@ const Login = () => {
                                 <div className='flex items-center justify-between'>
                                     <div className='flex gap-1.5 items-center'>
                                     <input 
+                                        name='check'
                                         type="checkbox"
                                         value={values.check}
                                         onChange={handleChange}

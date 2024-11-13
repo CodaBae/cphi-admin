@@ -3,7 +3,7 @@ import { CiFilter } from 'react-icons/ci'
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
 import { TbDownload } from 'react-icons/tb'
 import { FaPlus } from "react-icons/fa6";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import * as XLSX from "xlsx"
 
@@ -24,11 +24,14 @@ const Orgs = () => {
 
 
     const navigate = useNavigate()
+    const location  = useLocation()
+    const userData = location.state
 
     const { user } = useSelector((state) => state.adminLogin)
-    const adminLoginType = user?.userType
-    const adminName = user?.fullName
+    const adminLoginType = userData ? userData?.userType : user?.userType
+    const adminName = userData ? userData?.fullName : user?.fullName 
 
+    console.log(userData, "userData")
 
     
     const getAllOrgs = async () => {

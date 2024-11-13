@@ -42,7 +42,7 @@ const AdminDashboard = () => {
     const navigate = useNavigate()
 
 
-    const referrerUrl = `https://cphi-social.vercel.app/ref/${user?.referrerCode || ''}`; 
+    const referrerUrl = `https://refer.cphinigeria.org/ref/${user?.referrerCode || ''}`; 
 
     const downloadQRCode = () => {
         const canvas = qrRef.current.querySelector('canvas');
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
   return (
     <div className='w-full mt-2 '>
         <div  className='flex flex-col sm:flex-row items-center gap-4 sm:gap-10'> {/*  className='flex items-center gap-[10px]' */}
-            <div className='w-full sm:w-[336px] rounded-lg h-auto border border-[#E0E2E7] flex flex-col py-3 px-5' > {/* className='w-[336px] rounded-lg h-auto border border-[#E0E2E7] flex flex-col py-[11px] px-5' */}
+            <div className='w-full sm:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-3 px-5' > {/* className='w-[336px] rounded-lg h-auto border border-[#E0E2E7] flex flex-col py-[11px] px-5' */}
                 <div className='flex items-center cursor-pointer justify-between' onClick={() => copyToClipboard(referrerUrl)}>
                     <p className='font-sans text-sm text-[#424242]'>{referrerUrl}</p>
                     <BiSolidCopy className='text-[#2D84FF] w-5 h-5' />

@@ -320,30 +320,28 @@ const AdminAccess = () => {
                     currentAdmin?.length > 0 ?
                     currentAdmin?.map((item, index) => (
                         <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]'>
-                            
-                        
                             <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
                                 <p className='font-sans text-[#667085] font-medium text-sm'>{item?.date}</p>
                             </td>
                             <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
                                 <p className='font-sans text-[#667085] font-medium text-sm'>{item?.userType}</p>
                             </td>
-                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium cursor-pointer' onClick={() => {navigate("/referrals/details", { state: item}); window.scrollTo(0, 0)}}>
                                 <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
                                     {referralTotals[item.referrerCode] || 0}
                                 </p>
                             </td>
-                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                            <td className='w-[147px] h-[56px] text-left font-sans p-4 cursor-pointer font-medium' onClick={() => {navigate("/orgs", {state: item}); window.scrollTo(0, 0)}}>
                                 <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
                                     {orgTotals[item.fullName] || 0}
                                 </p>
                             </td>
-                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                            <td className='w-[147px] h-[56px] text-left font-sans cursor-pointer p-4 font-medium' onClick={() => {navigate("/individuals", { state: item}); window.scrollTo(0, 0)}}>
                                 <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
                                     {individualTotals[item.fullName] || 0}  
                                 </p>
                             </td>
-                            <td className='w-[147px] h-[56px] text-left font-sans  p-4 font-medium '>
+                            <td className='w-[147px] h-[56px] text-left font-sans cursor-pointer p-4 font-medium' onClick={() => {navigate("/kols", { state: item}); window.scrollTo(0, 0)}}>
                                 <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
                                     {kolTotals[item.fullName] || 0}
                                 </p>

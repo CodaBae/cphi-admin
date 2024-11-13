@@ -6,7 +6,7 @@ import { TbDownload } from 'react-icons/tb'
 import * as XLSX from "xlsx"
 
 import Activity from "../../assets/svg/activity.svg"
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { db } from '../../firebase-config'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { CgSpinner } from 'react-icons/cg'
@@ -23,10 +23,12 @@ const Referrals = () => {
 
 
     const navigate = useNavigate()
+    const location  = useLocation()
+    const userData = location.state
 
     const { user } = useSelector((state) => state.adminLogin)
-    const adminLoginType = user?.userType
-    const adminName = user?.fullName
+    const adminLoginType = userData ? userData?.userType : user?.userType
+    const adminName = userData ? userData?.fullName : user?.fullName
 
    
 

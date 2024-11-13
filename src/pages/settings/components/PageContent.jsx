@@ -54,6 +54,8 @@ const PageContent = () => {
             const contentRef = collection(db, "content")
             const querySnapshot = await getDocs(contentRef);
 
+            // const data = querySnapshot.docs[0].data();
+
             const data = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -75,7 +77,7 @@ const PageContent = () => {
         setLoading(true)
         try {
             
-            const contentRef = doc(db, 'content', contentData[0]?.id);
+            const contentRef = doc(db, 'content', contentData?.[0]?.id);
 
             await updateDoc(contentRef, {
                 heading: values?.heading,
@@ -98,10 +100,11 @@ const PageContent = () => {
         <div className='mt-[40px] flex flex-col'>
             <Formik
                 initialValues={{
-                    heading: "",
-                    sub: "",
+                    heading: contentData?.[0]?.heading || "",
+                    sub: contentData?.[0]?.sub || "",
                     link: ""
                 }}
+                enableReinitialize={true}
                 validationSchema={formValidationSchema}
                 onSubmit={(values, actions) => {
                     window.scrollTo(0, 0);
