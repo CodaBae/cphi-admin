@@ -411,13 +411,18 @@ const SuperAdminDashboard = () => {
                 </div>
             </div>
             <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
-                <Chart
-                    options={chartData.options}
-                    series={chartData.series}
-                    type='donut'
-                    width={600}
-                    height={240}
-                />
+                {
+                    chartData?.series > 0 ? 
+                    <Chart
+                        options={chartData.options}
+                        series={chartData.series}
+                        type='donut'
+                        width={600}
+                        height={240}
+                    />
+                    :
+                    <p className='text-3xl font-sans mx-auto font-medium mt-20'>No Services Available</p>
+                }
             </div>
         </div>
                    
