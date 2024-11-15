@@ -7,7 +7,7 @@ const Dashboard = () => {
 
     const { user } = useSelector((state) => state.adminLogin)
     const adminLoginType = user?.userType
-    console.log(user, "user")
+    
 
 
   return (

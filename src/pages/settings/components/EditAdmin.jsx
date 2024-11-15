@@ -13,7 +13,7 @@ const types = ["Select Type", "Program Assistant", "Super Admin"];
 const EditAdmin = ({ handleClose, adminData, editDataLoading, setEditDataLoading }) => {
     const [selectedType, setSelectedType] = useState(types[0])
 
-    console.log(adminData, "adminData")
+
 
     const submitForm = async (values, action) => {
         setEditDataLoading(true)
@@ -58,7 +58,7 @@ const EditAdmin = ({ handleClose, adminData, editDataLoading, setEditDataLoading
                     // validationSchema={formValidationSchema}
                     onSubmit={(values, action) => {
                     window.scrollTo(0, 0);
-                    console.log(values, "market")
+               
                     submitForm(values, action);
                 }}
             >

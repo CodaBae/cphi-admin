@@ -76,7 +76,7 @@ const RewardDisplay = () => {
         getRewards()
     }, [addLoading, deleteLoading, editLoading])
 
-    console.log(rewardsData, "rewardsData")
+   
 
     const filteredReward = rewardsData?.filter((item) => item.description.toLowerCase().includes(search.toLowerCase()) || "")
 

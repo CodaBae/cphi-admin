@@ -72,7 +72,6 @@ const AdminDashboard = () => {
         }
     };
     
-    console.log(referrals, "scheme");
 
     useEffect(() => {
         if (referrerCode) {

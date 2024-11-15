@@ -44,7 +44,6 @@ const Referrals = () => {
                 ...doc.data()
             }));
     
-            console.log("all Individuals:", individuals);
             setAllIndividuals(individuals);
         } catch (err) {
             console.log(err, "Error fetching individuals ");

@@ -55,7 +55,7 @@ const Login = () => {
     
         dispatch(loginAdmin({emailOrPhone, password}))
         .then((res) => {
-            console.log(res, "pablo")
+
             setLoading(false)
             if(res?.type === "login/loginAdmin/fulfilled") {
                 navigate("/dashboard")
@@ -101,7 +101,7 @@ const Login = () => {
                         validationSchema={formValidationSchema}
                         onSubmit={(values, action) => {
                         window.scrollTo(0, 0);
-                        console.log(values, "market")
+                      
                         submitForm(values, action);
                     }}
                 >

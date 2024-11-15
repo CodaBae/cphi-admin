@@ -24,7 +24,7 @@ const SuperAdminDashboard = () => {
     const [loading, setLoading] = useState(false)
 
     const adminData = useSelector((state) => state.adminLogin)
-    console.log(adminData, "fast")
+
 
     const getAllAppointments = async () => {
         const referralsRef = collection(db, "referrals");
@@ -39,7 +39,6 @@ const SuperAdminDashboard = () => {
                 ...doc.data()
             }));
     
-            console.log("Pending Referrals:", pendingReferrals);
             setAllAppointments(pendingReferrals);
         } catch (err) {
             console.log(err, "Error fetching pending referrals");
@@ -48,7 +47,6 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    console.log(allAppointments, "slik")
 
     const getAllOrgs = async () => {
         const orgsRef = collection(db, "users");
@@ -62,7 +60,6 @@ const SuperAdminDashboard = () => {
                 ...doc.data()
             }));
     
-            console.log("All Orgs:", orgs);
             setAllOrgs(orgs);
         } catch (err) {
             console.log(err, "Error fetching Orgs ");
@@ -81,7 +78,7 @@ const SuperAdminDashboard = () => {
                 ...doc.data()
             }));
     
-            console.log("All Individuals:", individuals);
+            
             setAllIndividuals(individuals);
         } catch (err) {
             console.log(err, "Error fetching Orgs ");
@@ -99,7 +96,6 @@ const SuperAdminDashboard = () => {
                 ...doc.data()
             }));
     
-            console.log("All Users:", allUsers);
             setLeaderBoard(allUsers);
         } catch (err) {
             console.error("Error fetching users:", err);

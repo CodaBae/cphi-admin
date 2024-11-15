@@ -37,8 +37,7 @@ const ReferralDetails = () => {
     const location = useLocation()
     const userDetails = location.state
 
-    console.log(userDetails, "userDetails")
-
+   
     const referrerUrl = `https://refer.cphinigeria.org/ref/${userDetails.referrerCode || ''}`; 
 
     const downloadQRCode = () => {
@@ -73,7 +72,7 @@ const ReferralDetails = () => {
         }
     };
     
-    console.log(referrals, "scheme");
+    
 
     useEffect(() => {
         if (referrerCode) {

@@ -50,7 +50,7 @@ const Appointments = () => {
                 ...doc.data()
             }));
     
-            console.log("All Referrals:", allReferrals);
+           
             setAllAppointments(allReferrals);
         } catch (err) {
             console.log(err, "Error fetching referrals");
@@ -108,9 +108,7 @@ const Appointments = () => {
                 ...doc.data()
             }));
     
-            console.log("Pending Referrals:", pendingReferrals);
-            console.log("No Show Referrals:", noShowReferrals);
-            console.log("Completed Referrals:", completedReferrals);
+       
             setAllPendingAppointments(pendingReferrals);
             setAllNoShowAppointments(noShowReferrals);
             setAllCompletedAppointments(completedReferrals);
@@ -128,7 +126,7 @@ const Appointments = () => {
         getAllAppointmentsByStatus()
     }, [updateLoading, updateLoadingB])
 
-    console.log(allAppointments, "allAppointments")
+
 
     function sortAppointmentsByDate(appointments) {
         const today = new Date();
@@ -165,7 +163,7 @@ const Appointments = () => {
     // Example usage
     const appointments = allAppointments;
     const sortedAppointments = sortAppointmentsByDate(appointments);
-    console.log(sortedAppointments, "sortedAppointments");
+
 
 
 

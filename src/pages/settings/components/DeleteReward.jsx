@@ -24,7 +24,7 @@ const DeleteReward = ({ handleClose, deleteLoading, setDeleteLoading, deleteData
         })
         .catch((err) => {
             setDeleteLoading(false)
-            console.log(err,  "mystic")
+           
             toast.error(`Error Deleting Admin`, { 
                 position: "top-right",
                 autoClose: 3500,

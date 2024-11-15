@@ -57,7 +57,6 @@ const AdminAccess = () => {
         }
     }
 
-    console.log(allAdmins, "allAdmins")
 
     const getKols = async (fullName) => {
         try {
@@ -128,7 +127,7 @@ const AdminAccess = () => {
                 where('addedBy', '==', fullName), where('type', '==', 'Organization')
             );
             const querySnapshot = await getDocs(q);
-            console.log(querySnapshot.docs, "peace")
+
             return querySnapshot.size; // Get the number of docs directly
         } catch (err) {
             console.error("Error fetching user details:", err);
@@ -149,7 +148,7 @@ const AdminAccess = () => {
         setOrgTotals(totals);    
     };
 
-    console.log(orgTotals, "orgs")
+   
 
     useEffect(() => {
         fetchTotalOrgs()

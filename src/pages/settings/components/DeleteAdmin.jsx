@@ -9,7 +9,7 @@ import { CgSpinner } from 'react-icons/cg'
 
 const DeleteAdmin = ({ handleClose, deleteData, setDeleteLoading, deleteLoading }) => {
 
-    console.log(deleteData, "deleteData")
+   
 
     const deleteItem = () => {
         setDeleteLoading(true)
@@ -26,7 +26,7 @@ const DeleteAdmin = ({ handleClose, deleteData, setDeleteLoading, deleteLoading 
         })
         .catch((err) => {
             setDeleteLoading(false)
-            console.log(err,  "mystic")
+         
             toast.error(`Error Deleting Admin`, { 
                 position: "top-right",
                 autoClose: 3500,

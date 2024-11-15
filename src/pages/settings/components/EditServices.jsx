@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 
 const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editData }) => {
 
-    console.log(editData, "editData")
+
 
     const formValidationSchema = Yup.object().shape({
         title: Yup.string()
@@ -70,7 +70,7 @@ const EditServices = ({ handleClose, setEditDataLoading, editDataLoading, editDa
                         enableReintialize={true}
                         onSubmit={(values, action) => {
                         window.scrollTo(0, 0);
-                        console.log(values, "market")
+                  
                         submitForm(values, action);
                     }}
                 >

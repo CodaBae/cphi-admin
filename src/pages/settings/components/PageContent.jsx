@@ -71,7 +71,7 @@ const PageContent = () => {
         getContent()
     }, [])
 
-    console.log(contentData, "contentData")
+    
 
     const submitForm = async (values, actions) => {
         setLoading(true)

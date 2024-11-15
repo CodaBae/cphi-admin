@@ -51,7 +51,6 @@ const AllServices = () => {
         getServices()
     }, [addLoading, editLoading, deleteLoading])
 
-    console.log(servicesData, "servicesData")
 
     const filteredReward = servicesData?.filter((item) => item.title.toLowerCase().includes(search.toLowerCase()) || "")
 

@@ -31,7 +31,6 @@ const Orgs = () => {
     const adminLoginType = userData ? userData?.userType : user?.userType
     const adminName = userData ? userData?.fullName : user?.fullName 
 
-    console.log(userData, "userData")
 
     
     const getAllOrgs = async () => {
@@ -46,7 +45,6 @@ const Orgs = () => {
                 ...doc.data()
             }));
     
-            console.log("All Orgs:", orgs);
             setAllOrgs(orgs);
         } catch (err) {
             console.log(err, "Error fetching Orgs ");

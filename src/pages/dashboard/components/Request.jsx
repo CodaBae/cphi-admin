@@ -10,8 +10,6 @@ const Request = ({ handleClose, data, userDetails }) => {
     const [loading, setLoading] = useState(false)
     const [rewards, setRewards] = useState([])
 
-    console.log(data, "simple")
-    console.log(userDetails, "userDetails")
 
 
     const submitForm = async () => {
@@ -49,7 +47,6 @@ const Request = ({ handleClose, data, userDetails }) => {
         }
     }
 
-    console.log(rewards, "paski")
 
     useEffect(() => {
         getRewards()

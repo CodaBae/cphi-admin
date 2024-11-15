@@ -44,7 +44,6 @@ const Kols = () => {
                 ...doc.data()
             }));
     
-            console.log("All kols:", kols);
             setAllKols(kols);
         } catch (err) {
             console.log(err, "Error fetching kols ");

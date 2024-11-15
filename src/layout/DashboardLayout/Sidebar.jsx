@@ -23,7 +23,7 @@ const Sidebar = ({ closeSidebar }) => {
 
   const {user } = useSelector((state) => state.adminLogin)
   const adminLogin = user?.userType
-  console.log(adminLogin, "adminLogin")
+  
 
 
   const handleLogout = () => {

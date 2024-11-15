@@ -49,7 +49,7 @@ const StatusUpdate = ({ handleClose, clientData, updateLoadingB, setUpdateLoadin
                     // validationSchema={formValidationSchema}
                     onSubmit={(values, action) => {
                     window.scrollTo(0, 0);
-                    console.log(values, "market")
+              
                     submitForm(values, action);
                 }}
             >

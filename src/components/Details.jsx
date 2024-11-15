@@ -15,8 +15,6 @@ const Details = () => {
     const location = useLocation()
     const userData = location.state
 
-    console.log(userData, "mellow")
-
     
     const updateStatus = async () => {
         setLoading(true)

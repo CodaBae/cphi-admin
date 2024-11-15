@@ -53,7 +53,6 @@ const RewardRequest = () => {
         }
     }
 
-    console.log(allRequests, "allRequests")
 
     useEffect(() => {
         getAllRequests()
