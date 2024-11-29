@@ -125,15 +125,6 @@ const SuperAdminDashboard = () => {
         getAllUsers()
     }, [])
 
-    // let monthlyReferrals = Array(12).fill(0);
-
-   
-    // allAppointments.forEach(appointment => {
-    //     const [day, month, year] = appointment.date.split('/').map(Number);
-    //     if (appointment.referrerCode) {
-    //         monthlyReferrals[month - 1] += 1;
-    //     }
-    // });
 
     const [chartOptions, setChartOptions] = useState({
         chart: {
@@ -173,30 +164,39 @@ const SuperAdminDashboard = () => {
         colors: ['#00E396'],
     });
 
-    // const [seriesData, setSeriesData] = useState([]);
+   
     const [seriesData, setSeriesData] = useState([{ name: 'Referrals', data: Array(12).fill(0) }]);
 
 
     useEffect(() => {
         const monthlyReferrals = Array(12).fill(0);
-
+    
+        // allAppointments?.forEach((appointment) => {
+        //     const dateString = appointment?.date;
+        //     if (dateString && appointment?.referrerCode) {
+        //         const [month, day, year] = dateString.split('/').map(Number); // Parse MM/DD/YYYY
+        //         if (month >= 1 && month <= 12) {
+        //             monthlyReferrals[month - 1] += 1; // Increment referrals for the month
+        //         }
+        //     }
+        // });
         allAppointments?.forEach((appointment) => {
-            const dateParts = appointment.date.split('/').map(Number);
-            if (dateParts.length === 3 && appointment.referrerCode) {
-                const month = dateParts[1];
-                if (month >= 1 && month <= 12) {
-                    monthlyReferrals[month - 1] += 1;
-                }
+            const date = new Date(appointment?.date); // Convert to Date object
+            if (!isNaN(date) && appointment?.referrerCode) {
+                const month = date.getMonth(); // 0-based index for months (Jan = 0, Dec = 11)
+                monthlyReferrals[month] += 1;
             }
         });
-
+    
+        console.log('Monthly Referrals:', monthlyReferrals);
+    
         setSeriesData([{ name: 'Referrals', data: monthlyReferrals }]);
-
+    
         setChartOptions((prevOptions) => ({
             ...prevOptions,
             yaxis: {
                 ...prevOptions.yaxis,
-                max: Math.max(10, ...monthlyReferrals) + 5,
+                max: Math.max(10, ...monthlyReferrals) + 5, // Dynamic y-axis max
             },
         }));
     }, [allAppointments]);
@@ -204,17 +204,21 @@ const SuperAdminDashboard = () => {
 
 
     const getYear = (dateString) => {
-        return new Date(dateString.split('/').reverse().join('-')).getFullYear();
+        if (!dateString) return null; // Handle undefined/null cases
+        const parts = dateString.split('/'); // Split the date string by '/'
+        const year = parts[2]; // Get the year part (3rd element)
+        return parseInt(year, 10); // Return year as a number
     };
-
+    
      // Filter appointments by selected year
-     const filteredAppointments = allAppointments?.filter(booking => getYear(booking.date) === selectedYear);
-
+     const filteredAppointments = allAppointments?.filter(
+        (booking) => getYear(booking?.date) === selectedYear
+    );
 
 
     //Service Graph
       let serviceCount = {};
-      filteredAppointments?.forEach(booking => {
+      filteredAppointments?.forEach((booking) => {
           booking.about.services.forEach(service => {
               if (service) {
                   serviceCount[service] = (serviceCount[service] || 0) + 1;
@@ -226,47 +230,51 @@ const SuperAdminDashboard = () => {
           .sort((a, b) => b[1] - a[1])
           .map(([service, count]) => ({ service, count }));
       
+          console.log(rankedServices, "rankedServices")
+
+          const hasData = rankedServices?.length > 0; // Check if there's data
+
+          console.log(hasData, "hasData")
       
-      const chartData = {
-          series: rankedServices.map(item => item.count),  
-          options: {
-              chart: {
-                  type: 'donut',
-              },
-              labels: rankedServices.map(item => item.service),  
-              colors: ['#10B981', '#F59E0B', '#34D399', '#F87171', '#A78BFA'],  
-              legend: {
-                  show: true,
-                  position: 'right',
-                  markers: {
-                      width: 12,
-                      height: 12,
-                      radius: 12,
-                  },
-              },
-              dataLabels: {
-                  enabled: false,
-                  formatter: function (val, opts) {
-                      return `${val.toFixed(0)}%`;
-                  },
-              },
-              plotOptions: {
-                  pie: {
-                      donut: {
-                          labels: {
-                              show: true,
-                              total: {
-                                  show: true,
-                                  label: 'Total Bookings',
-                                  formatter: function () {
-                                      return `${allAppointments?.length}`;
-                                  },
-                              },
-                          },
-                      },
-                  },
-              },
-              responsive: [
+    
+
+    const chartData = {
+        series: rankedServices.map((item) => item.count),
+        options: {
+            chart: {
+                type: 'donut',
+            },
+            labels: rankedServices.map((item) => item.service),
+            colors: ['#10B981', '#F59E0B', '#34D399', '#F87171', '#A78BFA'],
+            legend: {
+                show: true,
+                position: 'right',
+                markers: {
+                    width: 12,
+                    height: 12,
+                    radius: 12,
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        labels: {
+                            show: true,
+                            total: {
+                                show: hasData, // Show "Total Bookings" only when there's data
+                                label: 'Total Bookings',
+                                formatter: function () {
+                                    return `${allAppointments?.length}`;
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            responsive: [
                 {
                     breakpoint: 720,
                     options: {
@@ -281,7 +289,7 @@ const SuperAdminDashboard = () => {
                                 donut: {
                                     labels: {
                                         total: {
-                                            show: false,  // Hide "Total Bookings" label on mobile
+                                            show: false, // Hide "Total Bookings" label on mobile
                                         },
                                     },
                                 },
@@ -290,8 +298,8 @@ const SuperAdminDashboard = () => {
                     },
                 },
             ],
-          },
-      };
+        },
+    };
 
 
 
@@ -386,29 +394,33 @@ const SuperAdminDashboard = () => {
                     <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Referral Growth</p>
                 </div>
                 <div className='mt-4'>
-                    <Chart options={chartOptions} series={seriesData} type='line' height={300} />
+                    <Chart 
+                        options={chartOptions} 
+                        series={seriesData} 
+                        type='line' 
+                        height={300} 
+                    />
                 </div>
             </div>
 
-        <div className='flex flex-col w-full lg:w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
-            <div className='flex items-center justify-between'>
-                <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Services Rank</p>
-                <div className='flex items-center justify-center gap-4 cursor-pointer border border-[#E5E5EA] rounded-lg p-2 h-auto w-[120px]'>
-                    <MdOutlineCalendarToday className='w-4 h-4 text-[#1C1A3C]' />
-                    <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                        className='font-sans text-[#1C1A3C] font-medium text-xs cursor-pointer bg-transparent border-none outline-none'
-                    >
-                        {[2024, 2023, 2022].map(year => (
-                            <option key={year} value={year}>{year}</option>
-                        ))}
-                    </select>
+            <div className='flex flex-col w-full lg:w-8/12 h-[383px] border border-[#E0E2E7] p-4 rounded-lg'>
+                <div className='flex items-center justify-between'>
+                    <p className='text-[#1C1A3C] font-sans text-[18px] font-medium'>Services Rank</p>
+                    <div className='flex items-center justify-center gap-4 cursor-pointer border border-[#E5E5EA] rounded-lg p-2 h-auto w-[120px]'>
+                        <MdOutlineCalendarToday className='w-4 h-4 text-[#1C1A3C]' />
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className='font-sans text-[#1C1A3C] font-medium text-xs cursor-pointer bg-transparent border-none outline-none'
+                        >
+                            {[2024, 2025, 2026, 2027].map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
-                {
-                    chartData?.series > 0 ? 
+                <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
+                    {hasData ? (
                     <Chart
                         options={chartData.options}
                         series={chartData.series}
@@ -416,11 +428,11 @@ const SuperAdminDashboard = () => {
                         width={600}
                         height={240}
                     />
-                    :
+                ) : (
                     <p className='text-3xl font-sans mx-auto font-medium mt-20'>No Services Available</p>
-                }
+                )}
+                </div>
             </div>
-        </div>
                    
         </div>
 
