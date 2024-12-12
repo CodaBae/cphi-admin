@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { db } from '../../../firebase-config';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { CgSpinner } from 'react-icons/cg';
+import { useNavigate } from 'react-router-dom';
 
 
 const SuperAdminDashboard = () => {
@@ -24,6 +25,8 @@ const SuperAdminDashboard = () => {
     const [loading, setLoading] = useState(false)
 
     const adminData = useSelector((state) => state.adminLogin)
+
+    const navigate = useNavigate()
 
 
     const getAllAppointments = async () => {
@@ -171,22 +174,22 @@ const SuperAdminDashboard = () => {
     useEffect(() => {
         const monthlyReferrals = Array(12).fill(0);
     
-        // allAppointments?.forEach((appointment) => {
-        //     const dateString = appointment?.date;
-        //     if (dateString && appointment?.referrerCode) {
-        //         const [month, day, year] = dateString.split('/').map(Number); // Parse MM/DD/YYYY
-        //         if (month >= 1 && month <= 12) {
-        //             monthlyReferrals[month - 1] += 1; // Increment referrals for the month
-        //         }
-        //     }
-        // });
         allAppointments?.forEach((appointment) => {
-            const date = new Date(appointment?.date); // Convert to Date object
-            if (!isNaN(date) && appointment?.referrerCode) {
-                const month = date.getMonth(); // 0-based index for months (Jan = 0, Dec = 11)
-                monthlyReferrals[month] += 1;
+            const dateString = appointment?.date;
+            if (dateString && appointment?.referrerCode) {
+                const [month, day, year] = dateString.split('/').map(Number); // Parse MM/DD/YYYY
+                if (month >= 1 && month <= 12) {
+                    monthlyReferrals[month - 1] += 1; // Increment referrals for the month
+                }
             }
         });
+        // allAppointments?.forEach((appointment) => {
+        //     const date = new Date(appointment?.date); // Convert to Date object
+        //     if (!isNaN(date) && appointment?.referrerCode) {
+        //         const month = date.getMonth(); // 0-based index for months (Jan = 0, Dec = 11)
+        //         monthlyReferrals[month] += 1;
+        //     }
+        // });
     
         console.log('Monthly Referrals:', monthlyReferrals);
     
@@ -211,9 +214,12 @@ const SuperAdminDashboard = () => {
     };
     
      // Filter appointments by selected year
-     const filteredAppointments = allAppointments?.filter(
-        (booking) => getYear(booking?.date) === selectedYear
-    );
+    const filteredAppointments = allAppointments?.filter(
+        (booking) => {
+            console.log(booking, "orile")
+            return getYear(booking?.date) === selectedYear || 2024
+    });
+
 
 
     //Service Graph
@@ -422,15 +428,15 @@ const SuperAdminDashboard = () => {
                 <div className='mt-5 flex items-center flex-col lg:flex-row lg:gap-[98px]'>
                     {hasData ? (
                     <Chart
-                        options={chartData.options}
-                        series={chartData.series}
+                        options={chartData?.options}
+                        series={chartData?.series}
                         type='donut'
                         width={600}
                         height={240}
                     />
-                ) : (
-                    <p className='text-3xl font-sans mx-auto font-medium mt-20'>No Services Available</p>
-                )}
+                 ) : (
+                     <p className='text-3xl font-sans mx-auto font-medium mt-20'>No Services Available</p>
+                 )}
                 </div>
             </div>
                    
@@ -505,7 +511,7 @@ const SuperAdminDashboard = () => {
                                         <p className='font-sans text-[#667085] font-normal text-sm '>{item?.emailOrPhone}</p>      
                                     </td>
                                     
-                                    <td className='w-[168px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
+                                    <td className='w-[168px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium' onClick={() => navigate("/referrals/details", {state: item})}>
                                         <p className='font-sans text-[#2D84FF] font-medium text-sm'>
                                             {referralTotals[item.referrerCode] || 0}
                                         </p>

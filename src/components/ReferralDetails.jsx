@@ -61,7 +61,13 @@ const ReferralDetails = () => {
             
             const querySnapshot = await getDocs(q);
             
-            const userData = querySnapshot.docs.map(doc => doc.data());
+            const userData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            //querySnapshot.docs.map(doc => doc.data());
+
             
             setReferrals(userData);
             
@@ -204,7 +210,9 @@ const ReferralDetails = () => {
                             </tr>
                            :
                             currentReferrals?.length > 0 ?
-                            currentReferrals?.map((item, index) => (
+                            currentReferrals?.map((item, index) => {
+                                    console.log(item, "lamba")
+                                return (
                                 <tr key={index} className='w-full mt-[18px] border border-[#F0F1F3]' >
                                     
                                     <td className='w-[143px] h-[56px] text-left font-sans text-[#333843] p-4 font-medium '>
@@ -235,7 +243,7 @@ const ReferralDetails = () => {
             
                                 </tr>
             
-                            )) :  (
+                            )}) :  (
                                 <tr className='h-[300px] bg-white border-t border-grey-100'>
                                     <td colSpan="8" className="relative">
                                         <div className='absolute inset-0 flex items-center justify-center'>
