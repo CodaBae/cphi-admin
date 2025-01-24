@@ -141,7 +141,7 @@ const Appointments = () => {
             if (!isSameDay(dateA, today) && isSameDay(dateB, today)) return 1;
     
             // Sort by date (ascending)
-            return dateA - dateB;
+            return dateB - dateA;
         });
     }
     
@@ -160,7 +160,6 @@ const Appointments = () => {
         );
     }
     
-    // Example usage
     const appointments = allAppointments;
     const sortedAppointments = sortAppointmentsByDate(appointments);
 
@@ -240,7 +239,7 @@ const Appointments = () => {
   return (
     <div className='mt-[30px] w-full'>
         <div className='flex flex-col lg:flex-row items-center gap-[10px]'>
-            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[300px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Appointments</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -248,10 +247,10 @@ const Appointments = () => {
                     </div>
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
-                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allPendingAppointments?.length || 0}</p>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allAppointments?.length || 0}</p>
                 </div>
             </div>
-            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[300px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total Completed</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -262,7 +261,7 @@ const Appointments = () => {
                     <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allCompletedAppointments?.length || 0}</p>
                 </div>
             </div>
-            <div className='w-full lg:w-[336px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+            <div className='w-full lg:w-[300px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
                 <div className='flex items-center justify-between'>
                     <p className='font-sans text-sm text-[#817F9B]'>Total No Show</p>
                     <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
@@ -271,6 +270,17 @@ const Appointments = () => {
                 </div>
                 <div className='flex flex-col mt-3 gap-5'>
                     <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allNoShowAppointments?.length || 0}</p>
+                </div>
+            </div>
+            <div className='w-full lg:w-[300px] rounded-lg h-[167px] border border-[#E0E2E7] flex flex-col py-[11px] px-5'>
+                <div className='flex items-center justify-between'>
+                    <p className='font-sans text-sm text-[#817F9B]'>Pending Appointments</p>
+                    <div className='w-[44px] h-[44px] rounded-lg bg-[#5856D61A] p-2 flex items-center justify-center'>
+                        <img src={Activity} alt='Activity' className='w-5 h-5' />
+                    </div>
+                </div>
+                <div className='flex flex-col mt-3 gap-5'>
+                    <p className='font-sans text-[#1C1C1C] text-[30px] font-semibold'>{allPendingAppointments?.length || 0}</p>
                 </div>
             </div>
         </div>
