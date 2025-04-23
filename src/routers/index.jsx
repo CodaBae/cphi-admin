@@ -14,11 +14,15 @@ import Appointments from '../pages/appointments'
 import Details from '../components/Details'
 import ReferralDetails from '../components/ReferralDetails'
 import AddOrgs from '../pages/orgs/components/AddOrgs'
+import EditOrgs from '../pages/orgs/components/EditOrgs'
 import AddIndividual from '../pages/referrals/components/AddIndividual'
+import EditIndividual from '../pages/referrals/components/EditIndividual'
+import EditAppointment from '../pages/appointments/component/EditAppointment'
 import Settings from '../pages/settings'
 import ProtectRoute from './ProtectRoute'
 import Kols from '../pages/kol'
 import AddKols from '../pages/kol/components/AddKols'
+import EditKols from '../pages/kol/components/EditKols'
 
 
 const Routers = () => {
@@ -37,8 +41,12 @@ const Routers = () => {
           <Route path='/referrals/details' element={<ProtectRoute><ReferralDetails /></ProtectRoute>} />
           <Route path='/settings' element={<ProtectRoute><Settings /></ProtectRoute>} />
           <Route path='/orgs/add' element={<ProtectRoute><AddOrgs /></ProtectRoute>} />
+          <Route path='/orgs/edit' element={<ProtectRoute><EditOrgs /></ProtectRoute>} />
           <Route path='/kols/add' element={<ProtectRoute><AddKols /></ProtectRoute>} />
+          <Route path='/kols/edit' element={<ProtectRoute><EditKols /></ProtectRoute>} />
           <Route path='/individuals/add' element={<ProtectRoute><AddIndividual /></ProtectRoute>} />
+          <Route path='/individuals/edit' element={<ProtectRoute><EditIndividual /></ProtectRoute>} />
+          <Route path='/appointment/edit' element={<ProtectRoute><EditAppointment /></ProtectRoute>} />
           <Route path='/orgs' element={<ProtectRoute><Orgs /></ProtectRoute>} />
           <Route path='/kols' element={<ProtectRoute><Kols /></ProtectRoute>} />
           <Route path='/reward-request' element={<ProtectRoute><RewardRequest /></ProtectRoute>} />

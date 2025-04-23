@@ -8,6 +8,7 @@ import * as XLSX from "xlsx"
 import { db } from '../../firebase-config'
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import ModalPop from '../../components/modalPop'
+import Pagination from '../../components/Pagination'
 import StatusUpdate from './component/StatusUpdate'
 import { CgSpinner } from 'react-icons/cg'
 import { toast } from 'react-toastify'
@@ -416,6 +417,9 @@ const Appointments = () => {
                                            <div className='bg-[#1EC677] p-2 cursor-pointer rounded-xl' onClick={() => {setShowModal(true), setClientData(item)}}>
                                                 <p className='text-[#FFFFFF] font-sans whitespace-nowrap'>{updateLoadingB ? <CgSpinner className=" animate-spin text-lg text-[#FFF]" /> : 'Completed'}</p>
                                            </div>
+                                           <div className='bg-[#2D84FF] p-2 w-[80px]  cursor-pointer rounded-xl' onClick={() => {navigate("/appointment/edit", {state: item})}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Edit</p>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -437,7 +441,13 @@ const Appointments = () => {
               
             </div>
     
-            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+            <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                setCurrentPage={setCurrentPage}
+            />
+
+            {/* <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
                 <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
                     <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
@@ -454,7 +464,7 @@ const Appointments = () => {
                         <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-            </div>
+            </div> */}
 
         </div>
 

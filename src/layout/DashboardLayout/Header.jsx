@@ -39,6 +39,18 @@ const Header = ({ toggleSidebar }) => {
         }
     };
 
+    const deleteAllNotifications = async () => {
+        try {
+            const activityRef = collection(db, "activity");
+            const querySnapshot = await getDocs(activityRef);
+            const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+            await Promise.all(deletePromises);
+            setActivity([]);
+        } catch (err) {
+            console.log("Failed to delete all notifications", err);
+        }
+    };
+
     useEffect(() => {
         getNotifications();
     }, []);
@@ -92,10 +104,10 @@ const Header = ({ toggleSidebar }) => {
                         )}
                     </div>
 
-                    {isPanelOpen && (
+                    {/* {isPanelOpen && (
                         <div
                             ref={panelRef}
-                            className='bg-[#fff] w-[300px] p-2 flex flex-col gap-2 shadow-2xl absolute top-6 right-10'
+                            className='bg-[#fff] w-[300px] h-[500px] overflow-y-scroll p-2 flex flex-col gap-2 shadow-2xl absolute top-6 right-10'
                         >
                             {activity?.length > 0 ? (
                                 activity?.map((item) => (
@@ -113,6 +125,43 @@ const Header = ({ toggleSidebar }) => {
                             ) : (
                                 <p className='text-[#000] font-sans'>No New Notification</p>
                             )}
+                        </div>
+                    )} */}
+                    {isPanelOpen && (
+                        <div
+                            ref={panelRef}
+                            className='bg-[#fff] w-[300px] h-[500px] flex flex-col shadow-2xl absolute top-6 right-10'
+                        >
+                            {/* Panel Header */}
+                            <div className="flex justify-between items-center p-2 border-b">
+                                <h3 className="font-semibold text-[#000]">Notifications</h3>
+                                <button 
+                                    onClick={deleteAllNotifications}
+                                    className="text-[#000] text-sm cursor-pointer hover:text-gray-600"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+
+                            {/* Notifications List */}
+                            <div className="flex-1 overflow-y-auto p-2">
+                                {activity?.length > 0 ? (
+                                    activity?.map((item) => (
+                                        <p 
+                                            key={item?.id} 
+                                            className='text-[#000] font-sans cursor-pointer p-2 hover:bg-gray-100 rounded'
+                                            onClick={() => {
+                                                deleteNotification(item.id);
+                                                navigate("/client/details", { state: item });
+                                            }}
+                                        >
+                                            {`${item.profile.fullName} booked an appointment`}
+                                        </p>
+                                    ))
+                                ) : (
+                                    <p className='text-[#000] font-sans p-2'>No New Notifications</p>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

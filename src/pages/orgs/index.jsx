@@ -9,6 +9,11 @@ import * as XLSX from "xlsx"
 
 import Activity from "../../assets/svg/activity.svg"
 
+import Pagination from '../../components/Pagination'
+import ModalPop from '../../components/modalPop'
+
+import DeleteOrg from "./components/DeleteOrg"
+
 import { db } from '../../firebase-config';
 import { CgSpinner } from 'react-icons/cg';
 import { useSelector } from 'react-redux';
@@ -21,7 +26,8 @@ const Orgs = () => {
     const [allOrgs, setAllOrgs] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
     const [loading, setLoading] = useState(false)
-
+    const [openModal, setOpenModal] = useState(false)
+    const [orgData, setOrgData] = useState([])
 
     const navigate = useNavigate()
     const location  = useLocation()
@@ -104,17 +110,17 @@ const Orgs = () => {
      const indexOfFirstOrgs = indexOfLastOrgs - orgsPerPage;
      const currentOrgs = filteredOrgs?.slice(indexOfFirstOrgs, indexOfLastOrgs);
  
-     const handleNextPage = () => {
-         if (currentPage < Math.ceil(filteredOrgs?.length / orgsPerPage)) {
-             setCurrentPage(currentPage + 1);
-         }
-     };
+    //  const handleNextPage = () => {
+    //      if (currentPage < Math.ceil(filteredOrgs?.length / orgsPerPage)) {
+    //          setCurrentPage(currentPage + 1);
+    //      }
+    //  };
      
-     const handlePrevPage = () => {
-         if (currentPage > 1) {
-             setCurrentPage(currentPage - 1);
-         }
-     };
+    //  const handlePrevPage = () => {
+    //      if (currentPage > 1) {
+    //          setCurrentPage(currentPage - 1);
+    //      }
+    //  };
 
      useEffect(() => {
         setCurrentPage(1);
@@ -189,6 +195,9 @@ const Orgs = () => {
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Total Referrals</p>
                             </th>
+                            <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
+                                <p className='text-sm text-[#333843] font-sans'>Actions</p>
+                            </th>
                            
                         </tr>
                     </thead>
@@ -231,6 +240,18 @@ const Orgs = () => {
                                         <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
                                             {referralTotals[item.referrerCode] || 0}
                                         </p>
+                                    </td> 
+
+                             
+                                    <td className='w-[207px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
+                                        <div className="flex items-center gap-4">
+                                            <div className='bg-[#2D84FF] p-2 w-[80px]  cursor-pointer rounded-xl' onClick={() => {navigate("/orgs/edit", {state: item})}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Edit</p>
+                                            </div>
+                                            <div className='bg-[#F4003D] p-2 w-[80px] cursor-pointer rounded-xl' onClick={() => {setOrgData(item); setOpenModal(true)}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Delete</p>
+                                            </div>
+                                        </div>
                                     </td>                              
             
                                 </tr>
@@ -250,7 +271,13 @@ const Orgs = () => {
                 </table>
             </div>
     
-            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+            <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                setCurrentPage={setCurrentPage}
+            />
+
+            {/* <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
                 <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
                     <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
@@ -267,9 +294,14 @@ const Orgs = () => {
                         <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-            </div>
+            </div> */}
 
         </div>
+
+        <ModalPop isOpen={openModal}>
+            <DeleteOrg handleClose={() => setOpenModal(false)} orgData={orgData} />
+        </ModalPop>
+
     </div>
   )
 }

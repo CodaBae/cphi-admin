@@ -14,8 +14,9 @@ const DashboardLayout = () => {
      <div className="flex h-screen overflow-hidden">
       {/* Sidebar for desktop and mobile */}
       <div className={`fixed top-0 left-0 h-full bg-gray-100 z-50 transition-transform duration-300 ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 lg:w-[16%]`}>
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 lg:w-[16%]`}
+      >
         <Sidebar closeSidebar={() => setSidebarOpen(false)} />
       </div>
 

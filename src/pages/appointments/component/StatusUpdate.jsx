@@ -108,6 +108,7 @@ const StatusUpdate = ({ handleClose, clientData, updateLoadingB, setUpdateLoadin
                                     <option value="Positive">Positive</option>
                                     <option value="Negative">Negative</option>
                                     <option value="Unconfirmed">Unconfirmed</option>
+                                    <option value="Confirmed">Confirmed</option>
                                 </select>
                             </div>                            
                                                     

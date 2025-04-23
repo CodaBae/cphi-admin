@@ -4,13 +4,20 @@ import { FaPlus } from 'react-icons/fa6'
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from 'react-icons/io'
 import { TbDownload } from 'react-icons/tb'
 import * as XLSX from "xlsx"
-
-import Activity from "../../assets/svg/activity.svg"
-import { useLocation, useNavigate } from 'react-router-dom'
-import { db } from '../../firebase-config'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { CgSpinner } from 'react-icons/cg'
 import { useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+import { db } from '../../firebase-config'
+
+import Activity from "../../assets/svg/activity.svg"
+
+import Pagination from '../../components/Pagination'
+import ModalPop from '../../components/modalPop'
+
+import DeleteIndividual from "./components/DeleteIndividual"
+
 
 const Referrals = () => {
     const [search, setSearch] = useState("")
@@ -20,6 +27,8 @@ const Referrals = () => {
     const [allIndividuals, setAllIndividuals] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
     const [loading, setLoading] = useState(false)
+    const [openModal, setOpenModal] = useState(false)
+    const [individualData, setIndividualData] = useState([])
 
 
     const navigate = useNavigate()
@@ -192,9 +201,9 @@ const Referrals = () => {
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Total Referrals</p>
                             </th>
-                            {/*  <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
+                             <th className='w-[169px] h-[18px] text-left text-sm font-sans text-[#333843] p-4 font-medium '>
                                 Action
-                            </th> */}
+                            </th>
                         </tr>
                     </thead>
                     <tbody className=''>
@@ -235,6 +244,17 @@ const Referrals = () => {
                                             {referralTotals[item.referrerCode] || 0}
                                         </p>
                                     </td> 
+                                    <td className='w-[207px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
+                                        <div className="flex items-center gap-4">
+                                            <div className='bg-[#2D84FF] p-2 w-[80px]  cursor-pointer rounded-xl' onClick={() => {navigate("/individuals/edit", {state: item})}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Edit</p>
+                                            </div>
+                                            <div className='bg-[#F4003D] p-2 w-[80px] cursor-pointer rounded-xl' onClick={() => {setIndividualData(item); setOpenModal(true)}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Delete</p>
+                                            </div>
+                                        </div>
+                                    </td>    
+
                                     {/* <td className='w-[167px] h-[56px] text-left font-euclid text-[#333843] p-4 font-medium '>
                                         <div className={`${item?.status === "Completed" ? "bg-[#E7F4EE]" : item?.status === "No Show" ? "bg-[#FEE5EC]" : "bg-[#FDF1E8]"} w-[95px] p-1 h-auto rounded-xl`}>
                                             <p className={`${item?.status === "Completed" ? "text-[#0D894F]" : item?.status === "No Show" ? "text-[#F4003D]" : "text-[#E46A11]"} font-sans font-semibold text-center text-sm`}>{item?.status}</p>
@@ -258,8 +278,14 @@ const Referrals = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                setCurrentPage={setCurrentPage}
+            />
     
-            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+            {/* <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
                 <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
                     <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
@@ -276,9 +302,17 @@ const Referrals = () => {
                         <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-            </div>
+            </div> */}
 
         </div>
+
+        <ModalPop isOpen={openModal}>
+            <DeleteIndividual 
+                handleClose={() => setOpenModal(false)} 
+                individualData={individualData} 
+            />
+        </ModalPop>
+
     </div>
   )
 }

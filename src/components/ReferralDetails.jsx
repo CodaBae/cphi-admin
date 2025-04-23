@@ -38,7 +38,7 @@ const ReferralDetails = () => {
     const userDetails = location.state
 
    
-    const referrerUrl = `https://refer.cphinigeria.org/ref/${userDetails.referrerCode || ''}`; 
+    const referrerUrl = `https://refer.ching.org/ref/${userDetails.referrerCode || ''}`;  //`https://refer.cphinigeria.org/ref/${userDetails.referrerCode || ''}`; 
 
     const downloadQRCode = () => {
         const canvas = qrRef.current.querySelector('canvas');

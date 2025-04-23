@@ -9,6 +9,11 @@ import * as XLSX from "xlsx"
 
 import Activity from "../../assets/svg/activity.svg"
 
+import Pagination from '../../components/Pagination'
+import ModalPop from '../../components/modalPop'
+
+import DeleteKols from "./components/DeleteKols"
+
 import { db } from '../../firebase-config';
 import { CgSpinner } from 'react-icons/cg';
 import { useSelector } from 'react-redux';
@@ -21,6 +26,8 @@ const Kols = () => {
     const [allKols, setAllKols] = useState([])
     const [referralTotals, setReferralTotals] = useState({})
     const [loading, setLoading] = useState(false)
+    const [openModal, setOpenModal] = useState(false)
+    const [kolData, setKolData] = useState([])
 
 
     const navigate = useNavigate()
@@ -230,7 +237,18 @@ const Kols = () => {
                                         <p className='font-sans text-[#2D84FF] underline font-medium text-sm'>
                                             {referralTotals[item.referrerCode] || 0}
                                         </p>
-                                    </td>                              
+                                    </td>   
+
+                                    <td className='w-[207px] h-[56px] text-left font-sans text-[#667085] p-4 font-medium '>
+                                        <div className="flex items-center gap-4">
+                                            <div className='bg-[#2D84FF] p-2 w-[80px]  cursor-pointer rounded-xl' onClick={() => {navigate("/kols/edit", {state: item})}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Edit</p>
+                                            </div>
+                                            <div className='bg-[#F4003D] p-2 w-[80px] cursor-pointer rounded-xl' onClick={() => {setKolData(item); setOpenModal(true)}}>
+                                                <p className='text-[#FFFFFF] text-center font-sans whitespace-nowrap'>Delete</p>
+                                            </div>
+                                        </div>
+                                    </td>                             
             
                                 </tr>
                             )) : (
@@ -249,7 +267,7 @@ const Kols = () => {
                 </table>
             </div>
     
-            <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
+            {/* <div className='w-full flex flex-col sm:flex-row items-center justify-between p-5'>
                 <div className='bg-[#FAFAFE] w-full sm:w-[136px] h-[40px] flex items-center justify-center'>
                     <p className='font-sans text-[#667085] text-base'>Page {currentPage} of {totalPages}</p>
                 </div>
@@ -266,9 +284,20 @@ const Kols = () => {
                         <IoIosArrowForward className='text-[#667085]' />
                     </div>
                 </div>
-            </div>
+            </div> */}
+
+            <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                setCurrentPage={setCurrentPage}
+            />
 
         </div>
+
+        <ModalPop isOpen={openModal}>
+            <DeleteKols handleClose={() => setOpenModal(false)} kolData={kolData} />
+        </ModalPop>
+
     </div>
   )
 }
