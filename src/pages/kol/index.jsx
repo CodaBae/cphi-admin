@@ -195,6 +195,9 @@ const Kols = () => {
                             <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
                                 <p className='text-sm text-[#333843] font-sans'>Total Referrals</p>
                             </th>
+                            <th className='w-[157px] h-[18px] text-left font-sans text-[#333843] p-4 font-medium '>
+                                <p className='text-sm text-[#333843] font-sans'>Action</p>
+                            </th>
                            
                         </tr>
                     </thead>

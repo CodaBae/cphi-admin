@@ -24,13 +24,28 @@ const sexOptions = ["", "Male", "Female"]
 const EditAppointment = () => {
     const { state } = useLocation()
 
+    // Parse initial date/time from state
+    const parseInitialDate = () => {
+        if (!state?.date) return null
+        const [day, month, year] = state.date.split('/')
+        return new Date(year, month - 1, day) // Months are 0-indexed
+    }
+
+    const parseInitialTime = () => {
+        if (!state?.time) return null
+        const [hours, minutes] = state.time.split(':')
+        const date = new Date()
+        date.setHours(hours, minutes, 0, 0)
+        return date
+    }
+
     const [loading, setLoading] = useState(false)
     const [selectedLocation, setSelectedLocation] = useState(state?.location || locations[0]);
     const [selectedSex, setSelectedSex] = useState(state?.sex || sexOptions[0]);
     const [localGovernments, setLocalGovernments] = useState([]);
     const [selectedLg, setSelectedLg] = useState(state?.lg || "");
-    const [selectedDate, setSelectedDate] = useState(state?.date || null);
-    const [selectedTime, setSelectedTime] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(parseInitialDate)
+    const [selectedTime, setSelectedTime] = useState(parseInitialTime)
 
 
     const navigate = useNavigate()
